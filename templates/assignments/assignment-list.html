@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">My assignments</h3>
+          </div>
+          <div class="col-md-3 align-self-center">
+            <ul style="list-style: none;">
+              {% for assignment in assignments %}
+                <li><a href="{% url 'process:assignment_detail' assignment.slug %}" class="btn btn-primary mb-1">{{ assignment.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      <br>
+      </div>
+    </div>
+{% endblock %}

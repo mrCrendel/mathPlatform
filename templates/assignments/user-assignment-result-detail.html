@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Result</h3>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            {% if user.is_authenticated %}
+              <div id="not-enrolled-section">
+                <p>Here you can see  your assigment result!</p>
+                {{ result.assignment }} | {{ result.updated | time:"H:i" }}
+                <br>
+                {% for question in questions %}
+                  {{ forloop.counter }})
+                  <p>Topic {{ question.topic }}</p>
+                  <p>Question was:  {{ question.question }}</p>
+                  <p>True answer is : {{ question.question_answer }}</p>
+                  <p>Your answer: {{ question.user_answer }}</p>
+                  <p>Answer is: {{ question.is_correct }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      <br>
+      </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

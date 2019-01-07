@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Topic Detail Page</h3>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            {% if user.is_authenticated %}
+              <div id="not-enrolled-section">
+                <p style="font-size: 20px; font-family: 'Arial'">{{ topic_question }}</p>
+                <form class="" action="{% url 'process:topic_check' object.slug  topic.slug %}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                  {{ topic_check_context }}
+                  <input type="text"  name="question" value="{{ topic_question }}" hidden>
+                  <input action="" type="submit" class="btn btn-default enroll" value="Check"/>
+                  {{ topic_answer }}
+                </form>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            <ul style="list-style: none;">
+              <p>This is topic of subject</p>
+              {{ topic }}
+            </ul>
+          </div>
+        </div>
+      <br>
+      </div>
+    </div>
+{% endblock %}

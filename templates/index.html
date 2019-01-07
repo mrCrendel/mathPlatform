@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="col">
+    <div class="row">
+    {% if user.is_authenticated %}
+        <br>
+          <div class="col-sm-9">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Available assignments</h3>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">The name of the assignment</th>
+                                <th scope="col">Beginning</th>
+                                <th scope="col">Ending</th>
+                                <th scope="col">Duration</th>
+                                {% if user.is_staff %}
+                                <th scope="col">Answers</th>
+                                <th scope="col">Questions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for assignment in assignments %}
+                            {% if user.is_authenticated and user.is_staff %}
+
+                              <tr class="clickable-row" data-href="{% url 'process:supper_assignments_session_list' assignment.slug %}" style="cursor: pointer">
+                                <td>{{ assignment.title }}</td>
+                                {% if assignment.available_from %}
+                                    <td>{{ assignment.available_from }}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                {% if assignment.end_time %}
+                                    <td>{{ assignment.end_time }}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                {% if assignment.available_for_x_minutes %}
+                                    <td>{{ assignment.available_for_x_minutes }} min.</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                <th scope="col">
+                                    <a href="/download_answers/{{ assignment.id }}" style="text-decoration: none;">
+                                        <i class="icon-download"></i>
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="/download_questions/{{ assignment.id }}" style="text-decoration: none;">
+                                        <i class="icon-download"></i>
+                                    </a>
+                                </th>
+                              </tr>
+                            {% elif user.is_authenticated %}
+                            <tr class="clickable-row" data-href="{% url 'process:assignment_detail' assignment.slug %}" style="cursor: pointer">
+                                <td>{{ assignment.title }}</td>
+                                {% if assignment.available_from %}
+                                    <td>{{ assignment.available_from }}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                {% if assignment.end_time %}
+                                    <td>{{ assignment.end_time }}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                {% if assignment.available_for_x_minutes %}
+                                    <td>{{ assignment.available_for_x_minutes }} min.</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+          </div>
+          <div class="col-sm-3">
+
+                <div class="card " style='background:white;' >
+                  <div class="card-body">
+                    <h3 class="card-title">Subjects</h3>
+                    <br>
+                    <ul style="list-style: none;">
+                      <a href="{% url 'process:subjects_list' %}" class="btn btn-primary mb-1">All subjects</a>
+                      {% for subject_item in subjecs %}
+                        <li><a href="{% url 'process:subject_detail' subject_item.slug %}" class="btn btn-primary mb-1">{{ subject_item.title }}</a></li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+
+                <br>
+
+                <div class="card " style='background:white;' >
+                  <div class="card-body">
+                    <h3 class="card-title">Streams</h3>
+                    <br>
+                    <ul style="list-style: none;">
+                      <a href="{% url 'process:streams_list' %}" class="btn btn-primary mb-1">All streams</a>
+                      {% for stream_item in streams %}
+                        <li><a href="{% url 'process:stream_detail' stream_item.slug %}" class="btn btn-primary mb-1">{{ stream_item.title }}</a></li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+
+
+          </div>
+
+
+
+    {% endif %}
+      </div>
+    </div>
+        <br>
+
+
+        <div class="row">
+          <div class="col">
+
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Rules and Tips</h3>
+                    <div class="card-text">
+                        <p><i class="icon-circle-blank"></i> <b>NO</b> has the option of returning to the previous question without the intervention of the teacher</p>
+                        <p><i class="icon-circle-blank"></i> After the end of the assignment period, you will not be able to start another task</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    <br>
+
+    <script>
+    $(document).ready(function($) {
+        $(".clickable-row").click(function() {
+            var order = $('input[name=order]:checked').val();
+            window.location = $(this).data("href") + "?order=" + order;
+        });
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load main_tags %}
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Curator Assignment Session List</h3>
+          </div>
+
+          <div class="col-md-6 align-self-center">
+            {% if user.is_authenticated %}
+              <div id="not-enrolled-section">
+                <p>Here you can see all students which did assignment</p>
+              </div>
+
+              <table class="table table-hover">
+                  <thead>
+                      <tr>
+                          <th scope="col">User</th>
+                          <th scope="col">Started</th>
+                          <th scope="col">Finished</th>
+                          <th scope="col">Question ratio</th>
+                          <th scope="col">Percentage</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                  {% for session in assignment_session_list %}
+
+                        <tr class="clickable-row" data-href="{% url 'process:supper_sesion_result_detail' session.assignment.slug session.user.pk %}" style="cursor: pointer">
+                          <td>{{ session.user }}</td>
+                          {% if session.started_at %}
+                              <td>{{ session.started_at }}</td>
+                          {% else %}
+                              <td>-</td>
+                          {% endif %}
+                          {% if session.updated %}
+                              <td>{{ session.updated }}</td>
+                          {% else %}
+                              <td>-</td>
+                          {% endif %}
+                          <td> {{ session.questions_amount }}/{{ session.correct_answers }} </td>
+                          <td> {{ session.question_amount|percentage:session.correct_answers }}</td>
+                        </tr>
+
+                  {% endfor %}
+                  </tbody>
+              </table>
+
+            {% endif %}
+          </div>
+
+        </div>
+      <br>
+      </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+  <script>
+    $(document).ready(function($) {
+        $(".clickable-row").click(function() {
+            var order = $('input[name=order]:checked').val();
+            window.location = $(this).data("href") + "?order=" + order;
+        });
+    });
+  </script>
+{% endblock %}

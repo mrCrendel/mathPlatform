@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Streams</h3>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            {% if user.is_authenticated %}
+              <div id="not-enrolled-section">
+                <p style="font-size: 20px; font-family: 'Arial'">Enroll to Stream</p>
+                <!-- <input style="
+                  border: 2px solid #007bff;
+                  border-radius: 4px;
+                  padding-left: 20px;
+                  padding-top: 3px;
+                  padding-bottom: 5px;
+                  " type="text" placeholder="Enter the key"
+                       name="Enroll key" id="enroll-key">
+                <button type="button" class="btn btn-primary" id="enroll-btn">Enroll</button> -->
+                  {% if request.user not in stream.users.all %}
+                  <form class="" action="{% url 'process:stream_enroll' stream.slug %}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                    {{ enroll_form }}
+                    <input action="" type="submit" class="btn btn-default enroll" value="Enroll"/>
+                  </form>
+                  {% else %}
+                  <form class="" action="{% url 'process:stream_unenroll' stream.slug %}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                    {{ unenroll_form }}
+                    <input type="submit" class="btn btn-default" value="Unenroll"/>
+                  </form>
+                  {% endif %}
+
+
+              </div>
+              <div id="enrolled-section">
+                <h3>You're enrolled</h3>
+
+                <div id="assignments">
+                  <h3 id="assignments-title">Assignments</h3>
+                </div>
+                <div id="exams">
+                  <h3 id="exams-title" >Exams</h3>
+
+                </div>
+
+
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      <br>
+      </div>
+    </div>
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+  $(document).ready(function(){
+    $(".enroll").click(function() {
+      var updateVla = $(".unenroll").attr('action')
+      // alert(up)
+      window.open(updateVla,"_self")
+    });
+    $(".unenroll").click(function() {
+      var updateVla = $(".unenroll").val()
+      // alert(up)
+      window.open(updateVla,"_self")
+    });
+  });
+</script>
+{% endblock %}

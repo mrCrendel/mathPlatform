@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load widget_tweaks %}
+{% load shuffle %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">{{ assignment.title }}</h3>
+          </div>
+
+          <div class="col-md-5 align-self-center">
+              <div class="progress">
+                  <div class="progress-bar bg-info" role="progressbar" style="width: {{progress.progress}}%">{{ progress.index }} z {{ progress.count }}</div>
+              </div>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            <div id="countdown"></div>
+          </div>
+
+        </div>
+      <br>
+      <span id="basic"></span>
+      <br>
+      <p>{{ question.formatted_markdown | safe }}</p>
+      <form method="post" action="{% url 'process:assignment_session_form' assignment.slug %}">
+          {% csrf_token %}
+          {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+          <br>
+          <b>Code tests:</b>
+          <div id="">$${{ question.question }}$$</div>
+          <b>Reply:</b>
+          <br>
+
+          {% for field in form.visible_fields %}
+            <div id="basic" name="answer">
+                <span id="basic">{{ field }}</span>
+                {% for error in field.errors %}
+                  <span class="help-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+          {% endfor %}
+
+          <!-- <div id="my-code-wrapper" data-language="python" name="answer"></div> -->
+          <br>
+          <button type="submit" class="btn btn-success">Next question</button>
+      </form>
+      <br>
+
+
+      </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/countdown.js' %}"></script>
+    <script type="text/javascript">
+      $('#countdown').countdown('{{ assingnment_end|date:"Y/m/d H:i:s" }}', function(event) {
+        $(this).html(event.strftime('Time to the end: %H:%M:%S'));
+      });
+    </script>
+    <script type="text/javascript">
+      MQ = MathQuill.getInterface(MathQuill.getInterface.MAX);
+
+      var latex = $('#basic-latex').bind('keydown keypress', function() {
+        var prev = latex.val();
+        setTimeout(function() {
+          var now = latex.val();
+          if (now !== prev) mq.latex(now);
+        });
+      });
+      var mq = MQ.MathField($('#basic')[0], {
+        autoSubscriptNumerals: true,
+        handlers: { edit: function() {
+          if (!latex.is(':focus')) latex.val(mq.latex());
+        } }
+      });
+      latex.val(mq.latex());
+    </script>
+
+{% endblock %}

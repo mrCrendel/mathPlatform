@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load shuffle %}
+
+{% block content %}
+    <div class="row card-down-little">
+    <div class="col-md-12 card">
+    <br>
+    <div class="row">
+    <div class="col-md-4 align-self-center">
+        <h3 class="inline">Question {{ progress.index }}  &nbsp;&nbsp;</h3>
+        <button class="align-self-center btn btn-sm {{ question.difficulty | css_class }}" disabled>{{ question.difficulty | difficulty }}</button>
+    </div>
+    <div class="col-md-5 align-self-center">
+        <div class="progress">
+            <div class="progress-bar bg-info" role="progressbar" style="width: {{progress.progress}}%">{{ progress.index }} z {{ progress.count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 align-self-center">
+        <div id="countdown"></div>
+    </div>
+    </div>
+    <p>{{ question.formatted_markdown | safe }}</p>
+    <form method="post">
+        {% csrf_token %}
+        {% if question.type == 'O' %}
+            {% if question.tests %}
+                <b>Code tests:</b>
+                <div id="tests-wrapper" data-language="python">{{ question.tests }}</div>
+            {% endif %}
+            {% if question.forbiddenword_set.count > 0 %}
+                <b>Prohibited words:</b>
+                <ul class="list-inline">
+                    {% for word in question.forbiddenword_set.all %}
+                        <li>{{ word }},</li>
+                    {%  endfor %}
+                </ul>
+            {%  endif %}
+            <b>Reply:</b>
+        <div id="my-code-wrapper" data-language="python" name="answer"></div>
+        {% else %}
+        {% for a in question.answer_set.all|shuffle %}
+            <div class="col-md-8 offset-md-1">
+            <div class="form-check">
+                <input class="form-check-input" name="answer" type="checkbox" id="answer{{ a.id }}" value="{{ a.answer_text }}">
+                <label class="form-check-label" name="answer" for="answer{{ a.id }}">{{ a.answer_text }}</label>
+            </div>
+            </div>
+        {% endfor %}
+        {% endif %}
+         <br>
+        <button type="submit" class="btn btn-success">Next question</button>
+    </form>
+    <br>
+    </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'countdown.js' %}"></script>
+    <script type="text/javascript">
+      $('#countdown').countdown('{{ test_end|date:"Y/m/d H:i:s" }}', function(event) {
+        $(this).html(event.strftime('Czas do końca: %H:%M:%S'));
+      });
+    </script>
+{% endblock %}

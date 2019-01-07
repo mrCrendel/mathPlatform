@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Finish</h3>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            {% if user.is_authenticated %}
+              <div id="not-enrolled-section">
+                <p>Here you will make your examination FINAL!</p>
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      <br>
+      </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

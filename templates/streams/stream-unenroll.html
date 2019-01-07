@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}Unenroll{% endblock %}
+
+{% block content %}
+
+  <form method="post">{% csrf_token %}
+    <p>Are you sure you want to unenroll from  "{{ stream_unenroll }}"?</p>
+    <input type="submit" value="Confirm">
+  </form>
+
+{% endblock %}
