@@ -21,6 +21,11 @@ class TopicList:
     @staticmethod
     def is_multiplication(name):
         return "MULTIPLICATION" == name.upper()
+
     @staticmethod
     def is_division(name):
         return "DIVISION" == name.upper()
+
+    @staticmethod
+    def is_differential_equation(name):
+        return "DIFFERENTIAL_EQUATION" == name.upper()

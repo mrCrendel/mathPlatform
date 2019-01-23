@@ -6,6 +6,7 @@ from markdownx.utils import markdownify
 from process.subject_topic_list import *
 from process.subject_simplemath import *
 from process.subject_calculus_1 import *
+from process.subject_differential_equation import *
 # from main.settings import GITHUB_USERNAME, GITHUB_TOKEN
 
 
@@ -36,6 +37,8 @@ def questions_t_o_f(function_code, question, answer):
                                               TopicList.is_multiplication(function_code) or \
                                               TopicList.is_division(function_code):
         topic_answer = solve_simple_exercise(question, answer, function_code)
+    elif TopicList.is_differential_equation(function_code):
+        topic_answer = solve_diff_eq(question, answer)
     return topic_answer
 
 def question_solver(function_code, question):
@@ -61,17 +64,23 @@ def question_solver(function_code, question):
     elif TopicList.is_division(function_code):
         nums = parse_simple_operations(question, '/')
         topic_answer = nums[0] / nums[1]
+
+    elif TopicList.is_differential_equation(function_code):
+        topic_answer = answer_diff_eq(question)
+
     return topic_answer
 
 
 def question_creater(function_code):
     if TopicList.is_six_one(function_code):
+        print('----!')
         generated_question = generate_six_one()
 
     elif TopicList.is_simple_qe(function_code):
         generated_question = generate_simple_qe()
 
     elif TopicList.is_addition(function_code):
+        print('----!')
         generated_question = generate_simple_exercise('+')
 
     elif TopicList.is_subtraction(function_code):
@@ -83,4 +92,7 @@ def question_creater(function_code):
     elif TopicList.is_division(function_code):
         generated_question = generate_simple_exercise('/')
 
+    elif TopicList.is_differential_equation(function_code):
+        generated_question = generate_diff_eq()
+        
     return generated_question

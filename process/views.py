@@ -3,7 +3,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.core import serializers
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import JsonResponse, Http404, HttpResponseRedirect
+from django.http import JsonResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -25,6 +25,7 @@ from process.include import *
 from process.subject_topic_list import *
 from process.subject_calculus_1 import *
 from process.subject_simplemath import *
+from process.subject_differential_equation import *
 
 
 
@@ -136,7 +137,9 @@ class TopicDetailView(DetailView):
         context['topic_check_context'] = topic_check
         topic_slug = kwargs['object'].slug
         topic_code = kwargs['object'].function_code
-        context['topic_question'] = question_creater(topic_code)
+        question = question_creater(topic_code)
+        context['topic_latex_question'] = latex(question)
+        context['topic_question'] = question
         return context
 
 
@@ -160,15 +163,54 @@ class TopicCheckAnswerView(FormView):
         # user = self.request.user
         user_answer = form.cleaned_data['user_answer']
         topic_question = self.request.POST['question']
-        context['true_false_answer'] = questions_t_o_f(topic_code, topic_question, user_answer)
+        # print(topic_question)
+        # context['true_false_answer'] = questions_t_o_f(topic_code, topic_question, user_answer)
         context['answer'] = question_solver(topic_code, topic_question)
-        print(context['true_false_answer'])
-        print(context['answer'])
-        return context
+        # print(self.request.path)
+        # print(context['true_false_answer'])
+        print(context['answer'], "Answer")
+        return super(TopicCheckAnswerView, self).form_valid(form)
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('process:topic_detail', kwargs = {'slug': 'calculus-1','topic_slug': self.kwargs['slug']})
 
+
+    # def get(self, request):
+    #     form = TopicTakeAnswerForm()
+    #     return render(request, self.template_name, {'form':form})
+    #
+    # def post(self, request):
+    #     form = TopicTakeAnswerForm(request.POST)
+    #     if form.is_valid():
+    #         text = form.cleaned_data['post']
+    #         form = TopicTakeAnswerForm()
+    #         return redirect('process:topic_detail', kwargs = {'slug': 'simple-math','topic_slug': self.kwargs['slug']})
+    #
+    #     args = {'form': form, 'text': text}
+    #     return render(request, self.template_name, args)
+
+def check_user_answer(request):
+    print('Check answer is work!')
+    # subject = get_object_or_404(Subject, slug)
+    # topic = get_object_or_404(Topic, slug = topic_slug)
+    user_answer = request.GET.get('user_answer', None)
+    topic_slug = [ i for i in request.GET.get('my_location', None).split('/')][4]
+    topic_question = request.GET.get('topic_question', None)
+    topic  = Topic.objects.get(slug = topic_slug)
+    print(topic, 'This is Toic!')
+    topic_code = topic.function_code
+    print(topic_code, "This is topic code!")
+    # user = self.request.user
+    # true_false_answer = questions_t_o_f(topic_code, topic_question, user_answer)
+    answer = question_solver(topic_code, topic_question)
+    print(answer, 'Answer 1')
+    answer = latex(answer)
+    print(answer, 'Answer 2')
+    context = {
+        # 'true_false_answer': true_false_answer,
+        'answer': answer,
+    }
+    return JsonResponse(context)
 
 class AssignmentListView(ListView):
     template_name = 'assignments/assignment-list.html'
@@ -213,9 +255,9 @@ class AssignmentDetailView(DetailView):
 
         question_index = assignment_session.current_index
         question_count = assignment_session.questions_amount
-        assingment_end = assignment.available_from + datetime.timedelta(minutes=assignment.available_for_x_minutes)
+        assignment_end = assignment.available_from + datetime.timedelta(minutes=assignment.available_for_x_minutes)
 
-        if question_index >= question_count or timezone.now() > assingment_end:
+        if question_index >= question_count:
             assignment_session.current_index = question_count
             assignment_session.save()
             messages.add_message(self.request, messages.INFO, 'This assignment you already finished!')
@@ -228,7 +270,7 @@ class AssignmentDetailView(DetailView):
         question_list = AssignmentSessionQuestions.objects.filter(session = assignment_session)
         question_id_list = [ q_id.id for q_id in question_list ]
 
-        context['assingnment_end'] = assingment_end
+        context['assignment_end'] = assignment_end
         context['question'] = AssignmentSessionQuestions.objects.get(id = question_id_list[question_index])
         context['progress'] = ProgressBar(question_index, question_count)
         context['form'] = AssignmentFormViewForm(self.request.GET or None)
@@ -254,18 +296,19 @@ class AssignmentFormView(FormView):
     template_name = 'assignments/assignment-form.html'
     model = Assignment
     form_class = AssignmentFormViewForm
-    context_object_name = 'session'
+    context_object_name = 'assignment'
 
 
     def form_valid(self, form, **kwargs):
         context = super(AssignmentFormView,self).get_context_data(**kwargs)
         assignment_slug = self.kwargs['slug']
+        print(assignment_slug)
         user = self.request.user
         try:
             assignment = get_object_or_404(Assignment, slug=assignment_slug)
         except Assignment.DoesNotExist:
             messages.add_message(self.request, messages.WARNING, "Assignment " + assignment_slug + " does not exist")
-            return Http404("Assignment " + assignment_slug + " does not exist")
+            raise Http404("Assignment " + assignment_slug + " does not exist")
 
 
         assignment_session = AssignmentSession.objects.get(assignment = assignment, user = user)
@@ -277,7 +320,9 @@ class AssignmentFormView(FormView):
 
         answer = form.cleaned_data['answer']
         question.user_answer = answer
+        # questions_t_o_f() solve question and compare with user aswer and return True or False from givens
         question.is_correct = questions_t_o_f(question.topic.function_code, question.question, answer)
+        # question_solver() solve question and return answers
         question.question_answer = question_solver(question.topic.function_code, question.question)
         question.finished_at =  timezone.now()
         question.save()

@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load widget_tweaks %}
+{% load shuffle %}
 
 {% block content %}
     <div class="row card-down-little">
@@ -9,16 +11,17 @@
           <div class="col-md-4 align-self-center">
               <h3 class="inline">Topic Detail Page</h3>
           </div>
-
           <div class="col-md-3 align-self-center">
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
-                <p style="font-size: 20px; font-family: 'Arial'">{{ topic_question }}</p>
+                <p style="font-size: 20px; font-family: 'Arial'">$${{ topic_latex_question }}$$</p>
                 <form class="" action="{% url 'process:topic_check' object.slug  topic.slug %}" method="POST" enctype="multipart/form-data">{% csrf_token %}
                   {{ topic_check_context }}
-                  <input type="text"  name="question" value="{{ topic_question }}" hidden>
-                  <input action="" type="submit" class="btn btn-default enroll" value="Check"/>
-                  {{ topic_answer }}
+                  <input type="text"  name="question" placeholder="Enter answer" value="{{ topic_question }}" id="topic_question" hidden>
+                  <input action="" type="button" class="btn btn-default enroll" value="Check" id="check_user_answer"/>
+                  <input type="submit" name="answer" class="btn btn-default enroll" value="Next question"/>
+
+                  <p id="topic_answer"></p>
                 </form>
               </div>
             {% endif %}
@@ -34,4 +37,64 @@
       <br>
       </div>
     </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/countdown.js' %}"></script>
+  <script src="{% static 'js/append_buttons.js' %}"></script>
+
+  <script>
+    // $("#id_user_answer").change(function () {
+    //   console.log( $(this).val() );
+    // });
+    $(document).ready(function(){
+      $("#check_user_answer").click( function () {
+        var user_answer = $('#id_user_answer').val();
+        var my_location = window.location.pathname;
+        var topic_question = $("#topic_question").val();
+        $.ajax({
+          url: "/ajax/check_user_answer/",
+          data: {
+            'topic_question': topic_question,
+            'my_location': my_location,
+            'user_answer': user_answer,
+          },
+          dataType: 'json',
+          cache: false,
+          success: function(data) {
+            $('#topic_answer').html(data.answer)
+          }
+        });
+      })
+
+    });
+
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var mathFieldSpan = document.getElementById('math-field');
+      var latexSpan = document.getElementById('id_answer');
+      var MQ = MathQuill.getInterface(2);
+
+      mathField = MQ.MathField(mathFieldSpan, {
+          spaceBehavesLikeTab: true,
+          handlers: {
+              edit: function () { // useful event handlers
+                  mathField.focus();
+                  var enteredMath = mathField.latex(); // Get entered math in LaTeX format
+                  latexSpan.setAttribute("value", enteredMath); // simple API
+
+              }
+          }
+      });
+      mathField = MQ.MathField(mathFieldSpan, config);
+    })
+
+    function input(str) {
+      mathField.cmd(str);
+      mathField.focus();
+    }
+</script>
+
 {% endblock %}

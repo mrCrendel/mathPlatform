@@ -10,11 +10,12 @@
         <div class="row">
           <div class="col-md-4 align-self-center">
               <h3 class="inline">{{ assignment.title }}</h3>
+              {{ assignment_end }}
           </div>
 
           <div class="col-md-5 align-self-center">
               <div class="progress">
-                  <div class="progress-bar bg-info" role="progressbar" style="width: {{progress.progress}}%">{{ progress.index }} z {{ progress.count }}</div>
+                  <div class="progress-bar bg-info" role="progressbar" style="width: {{ progress.progress }}%">{{ progress.index }} / {{ progress.count }}</div>
               </div>
           </div>
 
@@ -23,9 +24,6 @@
           </div>
 
         </div>
-      <br>
-      <span id="basic"></span>
-      <br>
       <p>{{ question.formatted_markdown | safe }}</p>
       <form method="post" action="{% url 'process:assignment_session_form' assignment.slug %}">
           {% csrf_token %}
@@ -33,18 +31,55 @@
             {{ hidden }}
           {% endfor %}
           <br>
-          <b>Code tests:</b>
+          <b>Question:</b>
           <div id="">$${{ question.question }}$$</div>
           <b>Reply:</b>
           <br>
-
+          <br>
           {% for field in form.visible_fields %}
-            <div id="basic" name="answer">
-                <span id="basic">{{ field }}</span>
-                {% for error in field.errors %}
-                  <span class="help-block">{{ error }}</span>
-                {% endfor %}
+            <!-- MathQuill keyboard -->
+            <div id="keyboard">
+              <div class="btn-group" role="group" aria-label="math functions">
+                <button type="button" class="btn btn-default" onClick='input("^2")'>$$x^2$$</button>
+                <button type="button" class="btn btn-default" onClick='input("\\sqrt")'>√</button>
+                <button type="button" class="btn btn-default" onClick='input("\\sin")'>sin</button>
+                <button type="button" class="btn btn-default" onClick='input("\\cos")'>cos</button>
+                <button type="button" class="btn btn-default" onClick='input("\\tan")'>tan</button>
+                <button type="button" class="btn btn-default" onClick='input("/")'>/</button>
+                <button type="button" class="btn btn-default" onClick='input("\Pi")'>Pi</button>
+                <button type="button" class="btn btn-default" onClick='input("\dagger")'>Dagger</button>
+
+              </div>
             </div>
+            <table id="Compact" class="buttons nohide">
+              <tr>
+                <!-- <td class="padButton new-pad-button font16" data-append="^2" data-moveleft="0"><span class="mathquill-embedded-latex">x^2</span></td> -->
+                <button type="button" class="btn btn-default" onClick='input("^2")'>$$ x^2 $$</button>
+                <button type="button" class="btn btn-default" onClick='input("^{}")'>$$ x^{\msquare} $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\log_{ }\left(\right)")'>$$ \log_{\msquare} $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\sqrt{ }")'>$$ \sqrt{\square} $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\nthroot")'>$$ \sqrt[ \msquare ]{\square} $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\le")'>$$ \le $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\ge")'>$$ \ge $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\frac{ }{ }")'>$$ \frac{\msquare}{\msquare} $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\cdot")'>$$ \cdot $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\div")'>$$ \div $$</button>
+                <button type="button" class="btn btn-default" onClick='input("^{\circ}")'>$$ x^{\circ} $$</button>
+                <button type="button" class="btn btn-default" onClick='input("\pi")'>$$ \pi $$</button>
+
+              </tr>
+            </table>
+
+            <!-- MathQuill keyboard -->
+            <p>Type math here:
+              <span id="math-field" style="width: 400px; margin: 10px;"></span>
+            </p>
+              <div>
+                {{ field }}
+              </div>
+              {% for error in field.errors %}
+                <span class="help-block">{{ error }}</span>
+              {% endfor %}
           {% endfor %}
 
           <!-- <div id="my-code-wrapper" data-language="python" name="answer"></div> -->
@@ -60,12 +95,14 @@
 
 {% block js %}
     <script src="{% static 'js/countdown.js' %}"></script>
+    <script src="{% static 'js/append_buttons.js' %}"></script>
+
     <script type="text/javascript">
-      $('#countdown').countdown('{{ assingnment_end|date:"Y/m/d H:i:s" }}', function(event) {
-        $(this).html(event.strftime('Time to the end: %H:%M:%S'));
+      $('#countdown').countdown('{{ assignment_end|date:"Y/m/d H:i:s" }}', function(event) {
+        $(this).html(event.strftime('Time to end: %H:%M:%S'));
       });
     </script>
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
       MQ = MathQuill.getInterface(MathQuill.getInterface.MAX);
 
       var latex = $('#basic-latex').bind('keydown keypress', function() {
@@ -82,6 +119,32 @@
         } }
       });
       latex.val(mq.latex());
-    </script>
+    </script> -->
 
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        var mathFieldSpan = document.getElementById('math-field');
+        var latexSpan = document.getElementById('id_answer');
+        var MQ = MathQuill.getInterface(2);
+
+        mathField = MQ.MathField(mathFieldSpan, {
+            spaceBehavesLikeTab: true,
+            handlers: {
+                edit: function () { // useful event handlers
+                    mathField.focus();
+                    var enteredMath = mathField.latex(); // Get entered math in LaTeX format
+                    latexSpan.setAttribute("value", enteredMath); // simple API
+
+                }
+            }
+        });
+        mathField = MQ.MathField(mathFieldSpan, config);
+      })
+
+      function input(str) {
+        mathField.cmd(str);
+        mathField.focus();
+      }
+    </script>
 {% endblock %}
