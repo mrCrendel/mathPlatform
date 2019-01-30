@@ -29,7 +29,7 @@ def generate_diff_eq():
     return (expression)
 
 def solve_diff_eq(expression, answer):
-    if dsolve(expression, y(x)) == (answer):
+    if str(answer_diff_eq(expression)) == str(answer):
         return True
     else:
         return False
@@ -37,6 +37,5 @@ def solve_diff_eq(expression, answer):
 def answer_diff_eq(expression):
     # print(expression, 'This is my expression')
     # answer = dsolve(getattr(expression), y())
-    expression = eval(expression)
-    answer = dsolve(expression, y(x))
+    answer = dsolve(eval(expression), y(x))
     return answer

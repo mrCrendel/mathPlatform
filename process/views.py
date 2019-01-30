@@ -3,7 +3,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.core import serializers
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import JsonResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -190,24 +190,27 @@ class TopicCheckAnswerView(FormView):
     #     return render(request, self.template_name, args)
 
 def check_user_answer(request):
-    print('Check answer is work!')
+    # print('Check answer is work!')
     # subject = get_object_or_404(Subject, slug)
     # topic = get_object_or_404(Topic, slug = topic_slug)
     user_answer = request.GET.get('user_answer', None)
     topic_slug = [ i for i in request.GET.get('my_location', None).split('/')][4]
     topic_question = request.GET.get('topic_question', None)
     topic  = Topic.objects.get(slug = topic_slug)
-    print(topic, 'This is Toic!')
+    # print(topic, 'This is Toic!')
     topic_code = topic.function_code
-    print(topic_code, "This is topic code!")
+    # print(topic_code, "This is topic code!")
     # user = self.request.user
-    # true_false_answer = questions_t_o_f(topic_code, topic_question, user_answer)
-    answer = question_solver(topic_code, topic_question)
-    print(answer, 'Answer 1')
-    answer = latex(answer)
-    print(answer, 'Answer 2')
+    true_false_answer = questions_t_o_f(topic_code, topic_question, user_answer)
+    print(true_false_answer)
+    print(type(true_false_answer))
+    answer1 = question_solver(topic_code, topic_question)
+    print(answer1, 'Answer 1')
+    answer = latex(answer1)
+    # print(answer, 'Answer 2')
     context = {
-        # 'true_false_answer': true_false_answer,
+        'true_false_answer': true_false_answer,
+        # 'answer1': answer1,
         'answer': answer,
     }
     return JsonResponse(context)

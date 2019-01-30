@@ -20,8 +20,9 @@
                   <input type="text"  name="question" placeholder="Enter answer" value="{{ topic_question }}" id="topic_question" hidden>
                   <input action="" type="button" class="btn btn-default enroll" value="Check" id="check_user_answer"/>
                   <input type="submit" name="answer" class="btn btn-default enroll" value="Next question"/>
-
-                  <p id="topic_answer"></p>
+                  <br>
+                  <p id="get_true_or_false"></p>
+                  <p id="topic_answer" lang="latex"></p>
                 </form>
               </div>
             {% endif %}
@@ -42,7 +43,12 @@
 {% block js %}
   <script src="{% static 'js/countdown.js' %}"></script>
   <script src="{% static 'js/append_buttons.js' %}"></script>
-
+  <script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+  <!-- <script>
+    $(function () {
+        $(".latex").latex();
+    });
+  </script> -->
   <script>
     // $("#id_user_answer").change(function () {
     //   console.log( $(this).val() );
@@ -62,10 +68,33 @@
           dataType: 'json',
           cache: false,
           success: function(data) {
-            $('#topic_answer').html(data.answer)
+            var topic_answer = data.answer
+            var true_false_answer = data.true_false_answer
+            // alert(true_false_answer)
+            if (true_false_answer == true ){
+              $('#get_true_or_false').text('True');
+            } else {
+              $('#get_true_or_false').text('False');
+            }
+            // var topic_answer1 = data.answer1
+            // alert(topic_answer1)
+            if ($('#topic_answer img').attr('alt') == ''){
+              // alert($('#topic_answer img').attr('src'))
+              $('#topic_answer img').attr('alt', topic_answer);
+              $('#topic_answer img').attr('src' , $("#topic_answer img").attr('src') + topic_answer);
+            } else if ($('#topic_answer img').attr('alt')) {
+              $('#topic_answer img').attr('alt', topic_answer);
+              var index = $('#topic_answer img').attr('src').split('?')[0];
+              // alert(index)
+              $('#topic_answer img').attr('src' , index + '?' + topic_answer);
+            }
+
+
+
+
           }
         });
-      })
+      });
 
     });
 
