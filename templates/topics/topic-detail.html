@@ -21,6 +21,7 @@
                   <input action="" type="button" class="btn btn-default enroll" value="Check" id="check_user_answer"/>
                   <input type="submit" name="answer" class="btn btn-default enroll" value="Next question"/>
                   <br>
+                  <br>
                   <p id="get_true_or_false"></p>
                   <p id="topic_answer" lang="latex"></p>
                 </form>
@@ -43,12 +44,8 @@
 {% block js %}
   <script src="{% static 'js/countdown.js' %}"></script>
   <script src="{% static 'js/append_buttons.js' %}"></script>
-  <script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
-  <!-- <script>
-    $(function () {
-        $(".latex").latex();
-    });
-  </script> -->
+  <script src="{% static 'js/latexit.js' %}"></script>
+{#  <script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>#}
   <script>
     // $("#id_user_answer").change(function () {
     //   console.log( $(this).val() );

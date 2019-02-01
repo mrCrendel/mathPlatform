@@ -33,52 +33,52 @@
           <br>
           <b>Question:</b>
           <div id="">$${{ question.question }}$$</div>
-          <b>Reply:</b>
+          <b>Answer:</b>
           <br>
           <br>
           {% for field in form.visible_fields %}
             <!-- MathQuill keyboard -->
-            <div id="keyboard">
-              <div class="btn-group" role="group" aria-label="math functions">
-                <button type="button" class="btn btn-default" onClick='input("^2")'>$$x^2$$</button>
-                <button type="button" class="btn btn-default" onClick='input("\\sqrt")'>√</button>
-                <button type="button" class="btn btn-default" onClick='input("\\sin")'>sin</button>
-                <button type="button" class="btn btn-default" onClick='input("\\cos")'>cos</button>
-                <button type="button" class="btn btn-default" onClick='input("\\tan")'>tan</button>
-                <button type="button" class="btn btn-default" onClick='input("/")'>/</button>
-                <button type="button" class="btn btn-default" onClick='input("\Pi")'>Pi</button>
-                <button type="button" class="btn btn-default" onClick='input("\dagger")'>Dagger</button>
-
-              </div>
-            </div>
-            <table id="Compact" class="buttons nohide">
-              <tr>
-                <!-- <td class="padButton new-pad-button font16" data-append="^2" data-moveleft="0"><span class="mathquill-embedded-latex">x^2</span></td> -->
-                <button type="button" class="btn btn-default" onClick='input("^2")'>$$ x^2 $$</button>
-                <button type="button" class="btn btn-default" onClick='input("^{}")'>$$ x^{\msquare} $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\log_{ }\left(\right)")'>$$ \log_{\msquare} $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\sqrt{ }")'>$$ \sqrt{\square} $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\nthroot")'>$$ \sqrt[ \msquare ]{\square} $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\le")'>$$ \le $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\ge")'>$$ \ge $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\frac{ }{ }")'>$$ \frac{\msquare}{\msquare} $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\cdot")'>$$ \cdot $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\div")'>$$ \div $$</button>
-                <button type="button" class="btn btn-default" onClick='input("^{\circ}")'>$$ x^{\circ} $$</button>
-                <button type="button" class="btn btn-default" onClick='input("\pi")'>$$ \pi $$</button>
-
-              </tr>
-            </table>
+{#            <div id="keyboard">#}
+{#              <div class="btn-group" role="group" aria-label="math functions">#}
+{#                <button type="button" class="btn btn-default" onClick='input("^2")'>$$x^2$$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\\sqrt")'>√</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\\sin")'>sin</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\\cos")'>cos</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\\tan")'>tan</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("/")'>/</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\Pi")'>Pi</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\dagger")'>Dagger</button>#}
+{##}
+{#              </div>#}
+{#            </div>#}
+{#            <table id="Compact" class="buttons nohide">#}
+{#              <tr>#}
+{#                <!-- <td class="padButton new-pad-button font16" data-append="^2" data-moveleft="0"><span class="mathquill-embedded-latex">x^2</span></td> -->#}
+{#                <button type="button" class="btn btn-default" onClick='input("^2")'>$$ x^2 $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("^{}")'>$$ x^{\msquare} $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\log_{ }\left(\right)")'>$$ \log_{\msquare} $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\sqrt{ }")'>$$ \sqrt{\square} $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\nthroot")'>$$ \sqrt[ \msquare ]{\square} $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\le")'>$$ \le $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\ge")'>$$ \ge $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\frac{ }{ }")'>$$ \frac{\msquare}{\msquare} $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\cdot")'>$$ \cdot $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\div")'>$$ \div $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("^{\circ}")'>$$ x^{\circ} $$</button>#}
+{#                <button type="button" class="btn btn-default" onClick='input("\pi")'>$$ \pi $$</button>#}
+{##}
+{#              </tr>#}
+{#            </table>#}
 
             <!-- MathQuill keyboard -->
-            <p>Type math here:
+            <p>Type your answer here:
               <span id="math-field" style="width: 400px; margin: 10px;"></span>
             </p>
-              <div>
+              <div hidden>
                 {{ field }}
               </div>
               {% for error in field.errors %}
-                <span class="help-block">{{ error }}</span>
+                <span class="help-block" hidden>{{ error }}</span>
               {% endfor %}
           {% endfor %}
 

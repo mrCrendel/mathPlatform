@@ -25,7 +25,7 @@ SECRET_KEY = 'd3s7u!y_#^7#9nn+6dx&w3xhze)-3yb#k90233+k-umbh%b6)7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -34,14 +34,14 @@ INSTALLED_APPS = [
     # Django Jet Urls
     'jet.dashboard',
     'jet',
-    #primal apps
+    # initial apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # aploaded apps
+    # imported apps
     'bootstrap4',
     'ckeditor',
     'ckeditor_uploader',
