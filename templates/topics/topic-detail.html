@@ -85,13 +85,11 @@
               // alert(index)
               $('#topic_answer img').attr('src' , index + '?' + topic_answer);
             }
-
-
-
-
           }
         });
       });
+
+      window.onblur = () => location.reload();
 
     });
 
@@ -121,6 +119,8 @@
       mathField.cmd(str);
       mathField.focus();
     }
+
+
 </script>
 
 {% endblock %}

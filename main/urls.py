@@ -32,4 +32,5 @@ urlpatterns = [
     url(r'^', include('process.urls')),
     url(r'^markdownx/', include('markdownx.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^chaining/', include('smart_selects.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

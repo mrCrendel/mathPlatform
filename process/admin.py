@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 from markdownx.admin import MarkdownxModelAdmin
 from process.models import *
 
@@ -16,17 +17,39 @@ admin.site.register(Topic)
 # class UserAnswerAdmin(MarkdownxModelAdmin):
 #     inlines = [UserQuestionsAnswer]
 
+
+# class AssignmentTopicForm(forms.ModelForm):
+#
+#     class Meta:
+#         model = AssignmentTopic
+#         fields = "__all__"
+#
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['topic'].queryset = Topic.objects.none()
+
+
 class AssignmentTopicInline(admin.StackedInline):
     model = AssignmentTopic
+    # form = AssignmentTopicForm
     extra = 1
+
+    # class Media:
+    #     js = (
+    #         'https://code.jquery.com/jquery-3.3.1.min.js',  # jquery
+    #         'admin/js/formset_handlers.js',  # project static folder
+    #         # 'app/js/myscript.js',  # app static folder
+    #     )
 
 @admin.register(Assignment)
 class AssignmentAdmin(MarkdownxModelAdmin):
     inlines = [AssignmentTopicInline]
 
+
 class TopicAdmin(admin.StackedInline):
     model = Topic
     extra = 1
+
 
 @admin.register(Subject)
 class SubjectAdmin(MarkdownxModelAdmin):
@@ -37,9 +60,11 @@ class AssignmentSessionQuestionsAdmin(admin.StackedInline):
     model = AssignmentSessionQuestions
     extra = 0
 
+
 @admin.register(AssignmentSession)
 class AssignmentSessionAdmin(MarkdownxModelAdmin):
     inlines = [AssignmentSessionQuestionsAdmin]
 
     def is_finished(self, obj):
         return obj.current_index >= obj.questions_amount
+

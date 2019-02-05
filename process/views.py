@@ -190,30 +190,49 @@ class TopicCheckAnswerView(FormView):
     #     return render(request, self.template_name, args)
 
 def check_user_answer(request):
-    # print('Check answer is work!')
-    # subject = get_object_or_404(Subject, slug)
-    # topic = get_object_or_404(Topic, slug = topic_slug)
     user_answer = request.GET.get('user_answer', None)
-    topic_slug = [ i for i in request.GET.get('my_location', None).split('/')][4]
+    topic_slug = [i for i in request.GET.get('my_location', None).split('/')][4]
     topic_question = request.GET.get('topic_question', None)
-    topic  = Topic.objects.get(slug = topic_slug)
-    # print(topic, 'This is Toic!')
+    topic = Topic.objects.get(slug=topic_slug)
     topic_code = topic.function_code
-    # print(topic_code, "This is topic code!")
-    # user = self.request.user
     true_false_answer = questions_t_o_f(topic_code, topic_question, user_answer)
     print(true_false_answer)
     print(type(true_false_answer))
     answer1 = question_solver(topic_code, topic_question)
     print(answer1, 'Answer 1')
     answer = latex(answer1)
-    # print(answer, 'Answer 2')
     context = {
         'true_false_answer': true_false_answer,
         # 'answer1': answer1,
         'answer': answer,
     }
     return JsonResponse(context)
+
+
+def window_looses_foxus(request):
+    question_topic = request.GET.get('question_topic', None)
+    question_id = request.GET.get('question_id', None)
+    topic = Topic.objects.get(title=question_topic)
+    topic_fuction_code = topic.function_code
+    new_question = question_creater(topic_fuction_code)
+    session_question = get_object_or_404(AssignmentSessionQuestions, id=question_id)
+    session_question.question = new_question
+    session_question.save()
+    context = {
+        'new_question': new_question,
+    }
+    return JsonResponse(context)
+
+
+def load_topics(request):
+    subject_id = request.GET.get('subject')
+    subject = get_object_or_404(Subject, id=subject_id)
+    topic = Topic.objects.filter(subject=subject).order_by('title')
+    context = {
+        {'topic': topic}
+    }
+    return JsonResponse(context)
+
 
 class AssignmentListView(ListView):
     template_name = 'assignments/assignment-list.html'
@@ -236,7 +255,7 @@ class AssignmentDetailView(DetailView):
             stream = assignment.stream
         except Assignment.DoesNotExist:
             messages.add_message(self.request, messages.WARNING, "Assignment " + assignment_slug + " does not exist")
-            raise Http404("Assignment " + assingment + " does not exist")
+            raise Http404("Assignment does not exist")
 
         if user not in stream.users.all() or user.is_staff:
             messages.add_message(self.request, messages.WARNING, 'This assignment is not available for you')
@@ -275,25 +294,12 @@ class AssignmentDetailView(DetailView):
 
         context['assignment_end'] = assignment_end
         context['question'] = AssignmentSessionQuestions.objects.get(id = question_id_list[question_index])
+
         context['progress'] = ProgressBar(question_index, question_count)
+
         context['form'] = AssignmentFormViewForm(self.request.GET or None)
         return context
 
-    # def render_to_response(self, context):
-    #     try:
-    #         assignment = Assignment.objects.get(slug=assignment_slug)
-    #     except Assignment.DoesNotExist:
-    #         return redirect('process:index')
-    #
-    #     try:
-    #         assignment_session = AssignmentSession.objects.get(user=user, assignment=assignment)
-    #     except AssignmentSession.DoesNotExist:
-    #         return redirect('process:index')
-    #
-    #     if question_index >= question_count or timezone.now() > assingment_end:
-    #         return redirect('process:index')
-    #
-    #     return super(AssignmentDetailView, self).render_to_response(context)
 
 class AssignmentFormView(FormView):
     template_name = 'assignments/assignment-form.html'

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'markdownx',
     'pagedown',
     'sorl.thumbnail',
+    'smart_selects',
     'widget_tweaks',
     # my apps
     'process',

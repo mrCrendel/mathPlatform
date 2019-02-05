@@ -32,7 +32,9 @@
           {% endfor %}
           <br>
           <b>Question:</b>
-          <div id="">$${{ question.question }}$$</div>
+          <div id="topic_answer" lang="latex">{{ question.question }}</div>
+          <div id="question_topic" value="{{  question.topic }}" hidden>{{  question.topic }}</div>
+          <div id="question_id" value="{{  question.id }}" hidden>{{  question.id }}</div>
           <b>Answer:</b>
           <br>
           <br>
@@ -96,11 +98,44 @@
 {% block js %}
     <script src="{% static 'js/countdown.js' %}"></script>
     <script src="{% static 'js/append_buttons.js' %}"></script>
+    <script src="{% static 'js/latexit.js' %}"></script>
 
     <script type="text/javascript">
       $('#countdown').countdown('{{ assignment_end|date:"Y/m/d H:i:s" }}', function(event) {
         $(this).html(event.strftime('Time to end: %H:%M:%S'));
       });
+
+      window.onblur = function(){
+        var question_topic = $('#question_topic').html();
+        var question_id = $('#question_id').html();
+
+        $.ajax({
+            url: "/ajax/window_looses_foxus/",
+            data: {
+            'question_topic': question_topic,
+            'question_id': question_id,
+            {#'user_answer': user_answer,#}
+            },
+            dataType: 'json',
+            cache: false,
+            success: function(data) {
+                alert('You have left the exam page, the question has been updated! Please note the following violation of the exam rules will lead to automatic completion of the exam.')
+
+                var topic_answer = data.new_question
+
+                if ($('#topic_answer img').attr('alt') == '') {
+                    // alert($('#topic_answer img').attr('src'))
+                    $('#topic_answer img').attr('alt', topic_answer);
+                    $('#topic_answer img').attr('src', $("#topic_answer img").attr('src') + topic_answer);
+                } else if ($('#topic_answer img').attr('alt')) {
+                    $('#topic_answer img').attr('alt', topic_answer);
+                    var index = $('#topic_answer img').attr('src').split('?')[0];
+                    // alert(index)
+                    $('#topic_answer img').attr('src', index + '?' + topic_answer);
+                }
+            }
+        });
+      };
     </script>
     <!-- <script type="text/javascript">
       MQ = MathQuill.getInterface(MathQuill.getInterface.MAX);

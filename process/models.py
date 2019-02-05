@@ -7,6 +7,8 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 import datetime
 from process.include import *
+from smart_selects.db_fields import ChainedForeignKey
+
 
 # Create your models here.
 class HomePage(models.Model):
@@ -29,10 +31,10 @@ class Subject(models.Model):
 class Topic(models.Model):
     title = models.CharField(max_length=50, unique=True)
     subject = models.ForeignKey(Subject,
-                                   on_delete=models.CASCADE,
-                                   null=True,
-                                   blank=False)
-    function_code = models.CharField(max_length=50,null=True)
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=False)
+    function_code = models.CharField(max_length=50, null=True)
     slug = models.SlugField(unique=True)
 
     def __str__(self):
@@ -63,10 +65,11 @@ class Stream(models.Model):
 
 class Assignment(models.Model):
     title = models.CharField(max_length=50, unique=True)
-    stream = models.ForeignKey(Stream,
-                                  on_delete=models.CASCADE,
-                                  null=False,
-                                  blank=False)
+    stream = models.ForeignKey(
+        Stream,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -83,18 +86,26 @@ class Assignment(models.Model):
 
 
 class AssignmentTopic(models.Model):
-    assignment = models.ForeignKey(Assignment,
-                                      on_delete=models.CASCADE,
-                                      null=False,
-                                      blank=False)
-    subject = models.ForeignKey(Subject,
-                                 on_delete=models.CASCADE,
-                                 null=False,
-                                 blank=False)
-    topic = models.ForeignKey(Topic,
-                                 on_delete=models.CASCADE,
-                                 null=False,
-                                 blank=False)
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False)
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False)
+    topic = ChainedForeignKey(
+        Topic,
+        chained_field="subject",
+        chained_model_field="subject",
+        show_all=False,
+        auto_choose=True,
+        sort=True,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False)
     example_amount = models.PositiveIntegerField(default=1)
     points = models.PositiveIntegerField(default=5)
 
@@ -111,14 +122,16 @@ class AssignmentSessionMeneger(models.Manager):
 
 
 class AssignmentSession(models.Model):
-    user = models.ForeignKey(User,
-                                on_delete=models.CASCADE,
-                                null=False,
-                                blank=False)
-    assignment = models.ForeignKey(Assignment,
-                                      on_delete=models.CASCADE,
-                                      null=False,
-                                      blank=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False)
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False)
     started_at = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     questions_amount = models.IntegerField(default=0)
@@ -165,7 +178,7 @@ class AssignmentSessionQuestions(models.Model):
                                       blank=False)
     question = models.CharField(max_length=50)
     question_answer = models.CharField(max_length = 100, null = True, blank = False)
-    points = models.IntegerField()
+    points = models.IntegerField(null=True)
 
     user_answer = models.CharField(max_length = 100, null = True, blank = False)
     is_correct = models.CharField(max_length = 100, null = True, blank = False)

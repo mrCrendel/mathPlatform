@@ -36,4 +36,6 @@ urlpatterns = [
     url(r'^subjects/(?P<slug>[\w-]+)/topic/(?P<topic_slug>[\w-]+)/check/$', views.TopicCheckAnswerView.as_view(), name='topic_check'),
     # url(r'^subjects/(?P<slug>[\w-]+)/topic/(?P<topic_slug>[\w-]+)/check_user_answer/$', views.check_user_answer, name='check_user_answer'),
     url(r'^ajax/check_user_answer/$', views.check_user_answer, name='check_user_answer'),
+    url(r'^ajax/window_looses_foxus/$', views.window_looses_foxus, name='window_looses_foxus'),
+    url(r'^ajax/load_topics/$', views.load_topics, name='load_topics'),
 ]
