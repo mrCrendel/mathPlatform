@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load main_tags %}
+{% load ami_finish %}
 
 {% block content %}
   <div class="col">
@@ -24,8 +25,13 @@
                             </tr>
                         </thead>
                         <tbody>
+{#                        {{ request.user.id }}#}
                         {% for assignment in assignments %}
+
+
+
                             {% if user.is_authenticated and user.is_staff %}
+
 
                               <tr class="clickable-row" data-href="{% url 'process:supper_assignments_session_list' assignment.slug %}" style="cursor: pointer">
                                 <td>{{ assignment.title }}</td>
@@ -56,7 +62,13 @@
                                 </th>
                               </tr>
                             {% elif user.is_authenticated %}
-                            <tr class="clickable-row" data-href="{% url 'process:assignment_detail' assignment.slug %}" style="cursor: pointer">
+
+{#                                {% if assignment|ami_finish:request.user %}#}
+{#                                  <h1>Hihihihi/h1>#}
+{#                                {% endif %}#}
+{#                                {{ assignment|ami_finish:request.user }}#}
+                            <tr class="clickable-row" data-href="{% if assignment|ami_finish:request.user %}{% url 'process:assignment_detail' assignment.slug %}{% else %}{% url 'process:assignment_result_detail' assignment.slug %}{% endif %}" style="cursor: pointer">
+
                                 <td>{{ assignment.title }}</td>
                                 {% if assignment.available_from %}
                                     <td>{{ assignment.available_from }}</td>

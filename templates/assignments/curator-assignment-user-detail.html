@@ -13,8 +13,8 @@
           <div class="col-md-3 align-self-center">
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
-                <p>Here you can see  your assigment result!</p>
-                {{ supper_sesion_result.assignment }} | {{ supper_sesion_result.updated  }}
+                <h1>{{ s_user }}</h1>
+                {{ result.assignment }} | {{ result.updated  }}
                 <br>
                 {% for question in questions %}
                   {{ forloop.counter }})

@@ -14,8 +14,8 @@
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
                 <p>Here you can see yuor examination results!</p>
-                {% for result in user_assignments %}
-                  <a href="{% url 'process:assignment_result_detail' result.pk %}" class="btn btn-primary mb-1">{{ result.assignment }}</a>
+                {% for result in results %}
+                  <a href="{% url 'process:assignment_result_detail' result.slug %}" class="btn btn-primary mb-1">{{ result.title }}</a>
                 {% endfor %}
               </div>
             {% endif %}

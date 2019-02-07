@@ -6,7 +6,7 @@ from django import template
 
 register = template.Library()
 
-from ..models import Stream, Topic
+from ..models import *
 
 @register.inclusion_tag('index.html')
 def get_all_streams():
@@ -17,6 +17,9 @@ def get_all_streams():
 def get_all_topics():
     all_topics = Topic.objects.all()
     return {'all_topics': all_topics}
+
+
+
 
 @register.filter(name='percentage')
 def percentage(fraction, population):

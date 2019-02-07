@@ -84,6 +84,10 @@ TEMPLATES = [
     },
 ]
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.request',
+)
+
 WSGI_APPLICATION = 'main.wsgi.application'
 
 
@@ -151,7 +155,7 @@ CKEDITOR_CONFIGS = {
         'toolbar': None,
     },
 }
-
+USE_DJANGO_JQUERY = True
 LOGIN_REDIRECT_URL = 'process:index'
 
 GITHUB_USERNAME = os.environ.get('GITHUB_USERNAME', '')

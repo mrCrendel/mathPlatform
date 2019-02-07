@@ -19,14 +19,13 @@ admin.site.register(Topic)
 
 
 # class AssignmentTopicForm(forms.ModelForm):
-#
 #     class Meta:
 #         model = AssignmentTopic
-#         fields = "__all__"
+#         widgets = {
+#             'new_text': autocomplete.ListSelect2(url='post-new-text', forward=['target_field', 'check_field'])
+#         }
 #
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['topic'].queryset = Topic.objects.none()
+#         fields = ('__all__')
 
 
 class AssignmentTopicInline(admin.StackedInline):
@@ -34,12 +33,12 @@ class AssignmentTopicInline(admin.StackedInline):
     # form = AssignmentTopicForm
     extra = 1
 
-    # class Media:
-    #     js = (
-    #         'https://code.jquery.com/jquery-3.3.1.min.js',  # jquery
-    #         'admin/js/formset_handlers.js',  # project static folder
-    #         # 'app/js/myscript.js',  # app static folder
-    #     )
+    class Media:
+        js = (
+            'https://code.jquery.com/jquery-3.3.1.min.js',  # jquery
+            # 'admin/js/formset_handlers.js',  # project static folder
+            # 'app/js/myscript.js',  # app static folder
+        )
 
 @admin.register(Assignment)
 class AssignmentAdmin(MarkdownxModelAdmin):

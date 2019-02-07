@@ -27,8 +27,6 @@ urlpatterns = [
     url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': 'process:index'}, name='logout'),
 
-
-
     url(r'^', include('process.urls')),
     url(r'^markdownx/', include('markdownx.urls')),
     url(r'^admin/', admin.site.urls),

@@ -14,7 +14,7 @@
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
                 <p>Here you can see  your assigment result!</p>
-                {{ result.assignment }} | {{ result.updated | time:"H:i" }}
+                {{ result.title }} | {{ session }}
                 <br>
                 {% for question in questions %}
                   {{ forloop.counter }})
