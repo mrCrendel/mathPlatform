@@ -32,7 +32,7 @@
           {% endfor %}
           <br>
           <b>Question:</b>
-          <div id="topic_answer" lang="latex">{{ question.question }}</div>
+          <div id="topic_answer" lang="latex">{{ latex_question }}</div>
           <div id="question_topic" value="{{  question.topic }}" hidden>{{  question.topic }}</div>
           <div id="question_id" value="{{  question.id }}" hidden>{{  question.id }}</div>
           <b>Answer:</b>
@@ -108,7 +108,6 @@
       window.onblur = function(){
         var question_topic = $('#question_topic').html();
         var question_id = $('#question_id').html();
-
         $.ajax({
             url: "/ajax/window_looses_foxus/",
             data: {

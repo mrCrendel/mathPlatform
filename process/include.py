@@ -1,12 +1,12 @@
 import requests
-from django import template
-from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 from markdownx.utils import markdownify
-from process.subject_topic_list import *
-from process.subject_simplemath import *
-from process.subject_calculus_1 import *
-from process.subject_differential_equation import *
+from process.math.math_simplemath import *
+from process.math.math_differential_equation import *
+from process.math.math_differantial_equation_with import *
+from process.math.math_derivative import *
+from process.math.math_integral import *
+from process.math.math_limit import *
 # from main.settings import GITHUB_USERNAME, GITHUB_TOKEN
 
 
@@ -17,39 +17,39 @@ class ProgressBar:
         self.progress = round((index + 1) / count * 100)
 
 
-@mark_safe
-def markdown_to_html(markdown):
-    url = 'https://api.github.com/markdown'
-    r = requests.post(url, json={"text": markdown}, auth=(GITHUB_USERNAME, GITHUB_TOKEN))
-    if r.status_code == 200:
-        return r.content
-    else:
-        return markdownify(markdown).replace("<code>python", "<code>", 1)
+# @mark_safe
+# def markdown_to_html(markdown):
+#     url = 'https://api.github.com/markdown'
+#     r = requests.post(url, json={"text": markdown}, auth=(GITHUB_USERNAME, GITHUB_TOKEN))
+#     if r.status_code == 200:
+#         return r.content
+#     else:
+#         return markdownify(markdown).replace("<code>python", "<code>", 1)
 
 
 def questions_t_o_f(function_code, question, answer):
-    # get True or False to given question and answer
-    if TopicList.is_six_one(function_code):
-        topic_answer = solve_six_one(question, answer)
-    elif TopicList.is_simple_qe(function_code):
-        topic_answer = get_random_result(2)
-    elif TopicList.is_addition(function_code) or TopicList.is_subtraction(function_code) or \
+    if TopicList.is_addition(function_code) or TopicList.is_subtraction(function_code) or \
                                               TopicList.is_multiplication(function_code) or \
                                               TopicList.is_division(function_code):
         topic_answer = solve_simple_exercise(question, answer, function_code)
     elif TopicList.is_differential_equation(function_code):
-        topic_answer = solve_diff_eq(question, answer)
+        topic_answer = null_answer_diff_eq(question, answer)
+    elif TopicList.is_differential_equation_with(function_code):
+        topic_answer = null_answer_diff_eq_with(question, answer)
+    elif TopicList.is_integral(function_code):
+        topic_answer = null_answer_int_eq(question, answer)
+    elif TopicList.is_limit(function_code):
+        topic_answer = null_answer_lim_eq(question, answer)
+    elif TopicList.is_derivative(function_code):
+        topic_answer = null_answer_der_eq(question, answer)
+
     return topic_answer
+
 
 def question_solver(function_code, question):
     topic_answer = 0
-    if TopicList.is_six_one(function_code):
-        topic_answer = answer_six_one(question, answer)
 
-    elif TopicList.is_simple_qe(function_code):
-        topic_answer = get_random_result(2)
-
-    elif TopicList.is_addition(function_code):
+    if TopicList.is_addition(function_code):
         nums = parse_simple_operations(question, '+')
         topic_answer = nums[0] + nums[1]
 
@@ -66,20 +66,26 @@ def question_solver(function_code, question):
         topic_answer = nums[0] / nums[1]
 
     elif TopicList.is_differential_equation(function_code):
-        topic_answer = answer_diff_eq(question)
+        topic_answer = solve_diff_eq(question)
+
+    elif TopicList.is_differential_equation_with(function_code):
+        topic_answer = solve_diff_eq_with(question)
+
+    elif TopicList.is_integral(function_code):
+        topic_answer = solve_int_eq(question)
+
+    elif TopicList.is_limit(function_code):
+        topic_answer = solve_lim_eq(question)
+
+    elif TopicList.is_derivative(function_code):
+        topic_answer = solve_der_eq(question)
 
     return topic_answer
 
 
 def question_creater(function_code):
-    if TopicList.is_six_one(function_code):
-        print('----!')
-        generated_question = generate_six_one()
 
-    elif TopicList.is_simple_qe(function_code):
-        generated_question = generate_simple_qe()
-
-    elif TopicList.is_addition(function_code):
+    if TopicList.is_addition(function_code):
         print('----!')
         generated_question = generate_simple_exercise('+')
 
@@ -94,5 +100,17 @@ def question_creater(function_code):
 
     elif TopicList.is_differential_equation(function_code):
         generated_question = generate_diff_eq()
-        
+
+    elif TopicList.is_differential_equation_with(function_code):
+        generated_question = generate_diff_eq_with()
+
+    elif TopicList.is_integral(function_code):
+        generated_question = generate_int_eq()
+
+    elif TopicList.is_limit(function_code):
+        generated_question = generate_lim_eq()
+
+    elif TopicList.is_derivative(function_code):
+        generated_question = generate_der_eq()
+
     return generated_question

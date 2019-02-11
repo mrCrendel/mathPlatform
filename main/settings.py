@@ -50,10 +50,13 @@ INSTALLED_APPS = [
     'markdownx',
     'pagedown',
     'sorl.thumbnail',
+    'social_django',
     'smart_selects',
     'widget_tweaks',
+    'social.apps.django_app.default',
     # my apps
     'process',
+    'account',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +67,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # social_django
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'main.urls'
@@ -79,14 +85,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # social_django
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
+
     },
 ]
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.request',
-)
 
 WSGI_APPLICATION = 'main.wsgi.application'
 
@@ -120,7 +126,51 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# sotial_django
+AUTHENTICATION_BACKENDS = (
 
+    'account.authentication.EmailAuthBackend',
+    'social_core.backends.twitter.TwitterOAuth',
+    'social_core.backends.facebook.FacebookOAuth2',
+    # 'social_core.backends.open_id.OpenIdAuth',  # for Google authentication
+    # 'social_core.backends.google.GoogleOpenId',
+    'social_core.backends.google.GoogleOAuth2',
+
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# social auth settings
+SOCIAL_AUTH_FACEBOOK_KEY = '2360593104174854'  # Facebook App ID
+SOCIAL_AUTH_FACEBOOK_SECRET = '3d689b4ca50d27aae961521dfaf18812'  # Facebook App Secret
+# SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+SOCIAL_AUTH_TWITTER_KEY = ''  # Twitter Consumer Key
+SOCIAL_AUTH_TWITTER_SECRET = ''  # Twitter Consumer Secret
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '531005378623-nd21opbvdplv0fqqmjug5rou9s1rge94.apps.googleusercontent.com' # Google Consumer Key
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'wcGVay48FxdgCZoxlosqmQ7Y'  # Google Consumer Secret
+
+# SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+
+from django.core.urlresolvers import reverse_lazy
+
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+# LOGIN_REDIRECT_URL = 'dashboard'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'tggrmi@gmail.com'
+EMAIL_HOST_PASSWORD = 'muzafar4ikruslan'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'MathPlatform Team <noreply@example.com>'
+
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda u: reverse_lazy('user_detail',
+                                        args=[u.username])
+}
+
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During development only
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -147,7 +197,7 @@ STATICFILES_DIRS = [
 # Media files (Images, files)
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_CONFIGS = {
@@ -158,5 +208,19 @@ CKEDITOR_CONFIGS = {
 USE_DJANGO_JQUERY = True
 LOGIN_REDIRECT_URL = 'process:index'
 
-GITHUB_USERNAME = os.environ.get('GITHUB_USERNAME', '')
-GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+# GITHUB_USERNAME = os.environ.get('GITHUB_USERNAME', '')
+# GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['Link', 'Unlink'],
+            ['RemoveFormat', 'Source'],
+            ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe']
+        ]
+    },
+}

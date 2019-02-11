@@ -1,32 +1,18 @@
-from django.contrib.auth.models import User, Group
-from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
-from django.core import serializers
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from django.core.urlresolvers import reverse_lazy
+from django.http import JsonResponse, Http404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import (
                 TemplateView,
-                CreateView,
                 DetailView,
-                DeleteView,
                 ListView,
-                UpdateView,
-                View,
-                RedirectView,
-                )
-from django.views.generic.edit import FormMixin, FormView
-from process.mixins import FormUserNeededMixin, UserOwnerMixin
+)
+from django.views.generic.edit import FormView
 from process.models import *
 from process.forms import *
 from process.include import *
-from process.subject_topic_list import *
-from process.subject_calculus_1 import *
-from process.subject_simplemath import *
-from process.subject_differential_equation import *
-
+from process.mixins import FormUserNeededMixin, UserOwnerMixin
+from process.math.math_differential_equation import *
 
 
 class IndexTemplateView(TemplateView):
@@ -154,7 +140,6 @@ class TopicCheckAnswerView(FormView):
         # topic_slug = kwargs['object'].slug
         # return context
 
-
     def form_valid(self, form):
         context = super(TopicCheckAnswerView, self).form_valid(form)
         topic_slug = self.kwargs['slug']
@@ -199,7 +184,7 @@ def check_user_answer(request):
     print(true_false_answer)
     print(type(true_false_answer))
     answer1 = question_solver(topic_code, topic_question)
-    print(answer1, 'Answer 1')
+    print(type(answer1), 'Answer 1')
     answer = latex(answer1)
     context = {
         'true_false_answer': true_false_answer,
@@ -213,13 +198,14 @@ def window_looses_foxus(request):
     question_topic = request.GET.get('question_topic', None)
     question_id = request.GET.get('question_id', None)
     topic = Topic.objects.get(title=question_topic)
+    # print('id', question_id)
     topic_fuction_code = topic.function_code
     new_question = question_creater(topic_fuction_code)
     session_question = get_object_or_404(AssignmentSessionQuestions, id=question_id)
     session_question.question = new_question
     session_question.save()
     context = {
-        'new_question': new_question,
+        'new_question': str(latex(new_question)),
     }
     return JsonResponse(context)
 
@@ -289,7 +275,7 @@ class AssignmentDetailView(DetailView):
     #
     #     return context
 
-    def get_context_data(self,**kwargs):
+    def get_context_data(self, **kwargs):
         context = super(AssignmentDetailView, self).get_context_data(**kwargs)
         assignment_slug = self.kwargs['slug']
         user = self.request.user
@@ -308,7 +294,6 @@ class AssignmentDetailView(DetailView):
         try:
             assignment_session = AssignmentSession.objects.get(user=user, assignment=assignment)
 
-
         except AssignmentSession.DoesNotExist:
             if assignment.available_from > timezone.now():
                 messages.add_message(self.request, messages.WARNING, 'This assignment is not available yet')
@@ -320,12 +305,12 @@ class AssignmentDetailView(DetailView):
             assignment_session_question = AssignmentSessionQuestions.objects.create_session_question(assignment_session, assignment)
 
         assignment = Assignment.objects.get(slug=assignment_slug)
-        assignment_session = get_object_or_404(AssignmentSession, assignment=assignment)
+        assignment_session = get_object_or_404(AssignmentSession, user=self.request.user, assignment=assignment)
 
         question_index = assignment_session.current_index
         question_count = assignment_session.questions_amount
-        assignment_end = assignment.end_time
-        session_end = assignment.started_at + datetime.timedelta(minutes=assignment.available_for_x_minutes)
+        assignment_end = assignment_session.started_at + datetime.timedelta(minutes=assignment.available_for_x_minutes)
+        session_end = assignment_session.started_at + datetime.timedelta(minutes=assignment.available_for_x_minutes)
         if question_index >= question_count or timezone.now() > assignment_end or timezone.now() > assignment_end:
             assignment_session.current_index = question_count
             assignment_session.save()
@@ -338,9 +323,13 @@ class AssignmentDetailView(DetailView):
         # question_id = int(assignment_session.questions_amount.split(",")[question_index])
         question_list = AssignmentSessionQuestions.objects.filter(session=assignment_session)
         question_id_list = [q_id.id for q_id in question_list]
-
+        question = AssignmentSessionQuestions.objects.get(id=question_id_list[question_index])
+        q = question.question
         context['assignment_end'] = assignment_end
-        context['question'] = AssignmentSessionQuestions.objects.get(id=question_id_list[question_index])
+        context['question'] = question
+        print(q)
+        print(print_latex(q))
+        context['latex_question'] = latex(q)
         context['progress'] = ProgressBar(question_index, question_count)
         context['form'] = AssignmentFormViewForm(self.request.GET or None)
         return context
@@ -422,10 +411,16 @@ class AssignmentResultDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssignmentResultDetailView, self).get_context_data(**kwargs)
         messages.add_message(self.request, messages.INFO, 'This assignment you already finished!')
-        session = get_object_or_404(AssignmentSession, assignment=kwargs['object'])
+        session = get_object_or_404(AssignmentSession, user=self.request.user, assignment=kwargs['object'])
         # session = AssignmentSession.objects.filter(assignment=kwargs['object'])
+        questions = AssignmentSessionQuestions.objects.filter(session=session)
+        for question in questions:
+            if question.user_answer is None or question.question_answer is None:
+                question.question_answer = question_solver(question.topic.function_code, question.question)
+                question.is_correct = False
+                question.save()
         context['session'] = session.updated
-        context['questions'] = AssignmentSessionQuestions.objects.filter(session=session)
+        context['questions'] = questions
         return context
 
 

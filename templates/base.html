@@ -29,11 +29,11 @@
           {% if request.user.is_authenticated %}
             {% if request.user.is_staff %}
                 <a class="btn btn-outline-info" role="button" href="/create_user">Create a user</a>
-                <a class="btn btn-outline-info" role="button" href="/admin">Admin Panel</a>
+                <a class="btn btn-outline-info" role="button" href="{% url 'admin:index' %}">Admin Panel</a>
             {% endif %}
-               <a class="btn btn-outline-info" role="button" href="/logout">Log out</a>
+               <a class="btn btn-outline-info" role="button" href="{% url 'logout' %}">Log out</a>
           {% else %}
-              <a class="btn btn-outline-info" role="button" href="/login">Log in</a>
+              <a class="btn btn-outline-info" role="button" href="{% url 'login' %}">Log-in</a>
           {% endif %}
       </li>
     </ul>

@@ -38,6 +38,7 @@ class Topic(models.Model):
                                 null=True,
                                 blank=False)
     function_code = models.CharField(max_length=50, null=True)
+    description = RichTextUploadingField('Question description', default='')
     slug = models.SlugField(unique=True)
 
     def __str__(self):
@@ -53,7 +54,7 @@ class Topic(models.Model):
 class Stream(models.Model):
     users = models.ManyToManyField(User, blank=True)
     title = models.CharField(max_length=50, unique=True)
-    stream_description = models.TextField('Stream description', default='')
+    stream_description = RichTextUploadingField('Stream description', default='')
     stream_code = models.CharField(max_length=50,
                                    unique=True)
     enroll_key = models.CharField(max_length=20)
@@ -138,8 +139,8 @@ class AssignmentSession(models.Model):
     updated = models.DateTimeField(auto_now=True)
     questions_amount = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
-    correct_answers = models.IntegerField(default = 0)
-    incorrect_answers = models.IntegerField(default = 0)
+    correct_answers = models.IntegerField(default=0)
+    incorrect_answers = models.IntegerField(default=0)
 
     is_done = models.BooleanField(default=False)
     current_index = models.IntegerField(default=0)
@@ -159,7 +160,8 @@ class AssignmentSessionQuestionsMeneger(models.Manager):
             topic_code = topic.function_code
             while question_amount != 0:
                 generated_question = question_creater(topic_code)
-                assignment_session_question = self.create(session=session, topic=topic, question=str(generated_question), points=question_points)
+                assignment_session_question = self.create(session=session, topic=topic, question=str(generated_question),
+                                                          points=question_points, description=topic.description)
                 question_amount -=1
         return assignment_session_question
 
@@ -181,6 +183,7 @@ class AssignmentSessionQuestions(models.Model):
         on_delete=models.CASCADE,
         null=False,
         blank=False)
+    description = RichTextUploadingField('Question description', default='', null=True, blank=False)
     question = models.CharField(max_length=50)
     question_answer = models.CharField(max_length=100, null=True, blank=False)
     points = models.IntegerField(null=True)
