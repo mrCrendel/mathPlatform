@@ -15,7 +15,7 @@
           <div class="col-md-6 align-self-center">
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
-                <p>Here you can see all students which did assignment</p>
+                <p>Here you can see update assignment settings <a href="{% url 'process:assignment_update' supper_assignments_session.slug %}">update</a></p>
               </div>
 
               <table class="table table-hover">

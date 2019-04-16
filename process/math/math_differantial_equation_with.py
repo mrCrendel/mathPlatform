@@ -30,7 +30,7 @@ def generate_diff_eq_with():
 
 
 def solve_diff_eq_with(eq):
-
+    eq = eval(eq)
     y0 = eq[1]
     y1 = eq[2]
     eq = eq[0]

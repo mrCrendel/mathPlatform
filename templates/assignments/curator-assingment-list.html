@@ -13,7 +13,7 @@
           <div class="col-md-3 align-self-center">
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
-                <p>Here you can see all assignment list</p>
+                <p>Here you can see update assignment settings <a href="{% url 'process:assignment_delete' %}'">update</a></p>
                 {% for assigment in supper_assignments %}
                   <a href="{% url 'process:supper_assignments_session_list' assigment.slug %}" class="btn btn-primary mb-1">{{ assigment.title }}</a>
                 {% endfor %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}Create Stream{% endblock %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Streams</h3>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            {% if user.is_authenticated %}
+                <h1>Feel Form</h1>
+                <hr>
+                <form class="" action="" id="assignmentForm" method="POST" data-topics-url="{% url 'process:load_topics' %}" enctype="multipart/form-data" novalidate>{% csrf_token %}
+                    {{ form.as_p }}
+                      <!-- <table>
+{#                        {{ topic_formset }}#}
+                      </table> -->
+
+                      <table class="table">
+                        {{ addtopic.management_form }}
+
+                        {% for form in addtopic.forms %}
+                            {% if forloop.first %}
+                                <thead>
+                                <tr>
+                                    {% for field in form.visible_fields %}
+                                        <th>{{ field.label|capfirst }}</th>
+                                    {% endfor %}
+                                </tr>
+                                </thead>
+                            {% endif %}
+                            <tr class="{% cycle row1 row2 %}  formset_row">
+                              {% for field in form.visible_fields %}
+                                <td>
+                                  {# Include the hidden fields in the form #}
+                                  {% if forloop.first %}
+                                      {% for hidden in form.hidden_fields %}
+                                          {{ hidden }}
+                                      {% endfor %}
+                                  {% endif %}
+                                  {{ field.errors.as_ul }}
+                                  {{ field }}
+                                </td>
+                              {% endfor %}
+                            </tr>
+                          {% endfor %}
+                        </table>
+                  <input type="submit" class="btn btn-default" value="Save"/>
+                  <a href="{% url 'process:index' %}">Come back</a>
+                </form>
+            {% endif %}
+          </div>
+
+        </div>
+      <br>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+{#    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>#}
+    <script src="{% static 'js/jquery.formset.js' %}"></script>
+    <script type="text/javascript">
+        $('.formset_row').formset({
+            addText: 'Add new topic',
+            deleteText: 'Delete',
+            prefix: 'addtopic_set'
+        });
+
+        // $(document).ready(function(){
+        //   $(".update").click(function() {
+        //     var updateVla = $(".update").val()
+        //     window.open(updateVla,"_self")
+        //   });
+        //
+        //   $(".delete").click(function() {
+        //     var updateVla = $(".delete").val()
+        //     // alert(up)
+        //     window.open(updateVla,"_self")
+        //   });
+        // });
+    </script>
+     <script>
+    $("#id_assignmenttopic_set-0-subject").change(function () {
+      var url = $("#personForm").attr("data-topic-url");  // get the url of the `load_cities` view
+      var subjectId = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+        data: {
+          'subject': subjectId       // add the country id to the GET parameters
+        },
+        success: function (data) {   // `data` is the return of the `load_cities` view function
+          $("#id_assignmenttopic_set-0-topic").html(data);  // replace the contents of the city input with the data that came from the server
+        }
+      });
+
+    });
+  </script>
+{% endblock %}

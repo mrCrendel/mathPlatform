@@ -104,7 +104,7 @@
                     <br>
                     <ul style="list-style: none;">
                       <a href="{% url 'process:subjects_list' %}" class="btn btn-primary mb-1">All subjects</a>
-                      {% for subject_item in subjecs %}
+                      {% for subject_item in subjects %}
                         <li><a href="{% url 'process:subject_detail' subject_item.slug %}" class="btn btn-primary mb-1">{{ subject_item.title }}</a></li>
                       {% endfor %}
                     </ul>
@@ -120,7 +120,12 @@
                     <ul style="list-style: none;">
                       <a href="{% url 'process:streams_list' %}" class="btn btn-primary mb-1">All streams</a>
                       {% for stream_item in streams %}
-                        <li><a href="{% url 'process:stream_detail' stream_item.slug %}" class="btn btn-primary mb-1">{{ stream_item.title }}</a></li>
+                          {% if user.is_staff %}
+                              <li><a href="{% url 'process:stream_update' stream_item.slug %}" class="btn btn-primary mb-1">{{ stream_item.title }}</a></li>
+                          {% else %}
+                              <li><a href="{% url 'process:stream_detail' stream_item.slug %}" class="btn btn-primary mb-1">{{ stream_item.title }}</a></li>
+                          {% endif %}
+
                       {% endfor %}
                     </ul>
                   </div>

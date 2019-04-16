@@ -34,7 +34,7 @@ def solve_int_eq(expression):
     # print(expression, 'This is my expression')
     # answer = dsolve(getattr(expression), y())
     # expression = get_expression(expression)
-    answer = integrate(expression, x)
+    answer = eval(expression).doit()
     return answer
 
 

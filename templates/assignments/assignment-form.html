@@ -22,7 +22,6 @@
           <div class="col-md-3 align-self-center">
             <div id="countdown"></div>
           </div>
-
         </div>
       <p>{{ question.formatted_markdown | safe }}</p>
       <form method="post" action="{% url 'process:assignment_session_form' assignment.slug %}">
@@ -32,9 +31,10 @@
           {% endfor %}
           <br>
           <b>Question:</b>
+          <p id="question_description">{{ question_description }}</p>
           <div id="topic_answer" lang="latex">{{ latex_question }}</div>
-          <div id="question_topic" value="{{  question.topic }}" hidden>{{  question.topic }}</div>
-          <div id="question_id" value="{{  question.id }}" hidden>{{  question.id }}</div>
+          <div id="question_topic" value="{{  question.topic }}" >{{  question.topic }}</div>
+          <div id="question_id" value="{{  question.id }}" >{{  question.id }}</div>
           <b>Answer:</b>
           <br>
           <br>
@@ -99,10 +99,19 @@
     <script src="{% static 'js/countdown.js' %}"></script>
     <script src="{% static 'js/append_buttons.js' %}"></script>
     <script src="{% static 'js/latexit.js' %}"></script>
+{#    <script src="{% static 'js/jquery.countdown.js' %}"></script>#}
 
     <script type="text/javascript">
       $('#countdown').countdown('{{ assignment_end|date:"Y/m/d H:i:s" }}', function(event) {
         $(this).html(event.strftime('Time to end: %H:%M:%S'));
+      });
+
+        var start = new Date;
+
+      $(".timer").countdown("2019/01/01", function(event) {
+        $(this).text(
+          event.strftime('%D days %H:%M:%S')
+        );
       });
 
       window.onblur = function(){
@@ -120,13 +129,16 @@
             success: function(data) {
                 {#alert('You have left the exam page, the question has been updated! Please note the following violation of the exam rules will lead to automatic completion of the exam.')#}
 
-                var topic_answer = data.new_question
+                var topic_answer = data.new_question;
+                var question_description = data.new_description;
 
                 if ($('#topic_answer img').attr('alt') == '') {
                     // alert($('#topic_answer img').attr('src'))
+                    $('#question_description').text(question_description);
                     $('#topic_answer img').attr('alt', topic_answer);
                     $('#topic_answer img').attr('src', $("#topic_answer img").attr('src') + topic_answer);
                 } else if ($('#topic_answer img').attr('alt')) {
+                    $('#question_description').text(question_description);
                     $('#topic_answer img').attr('alt', topic_answer);
                     var index = $('#topic_answer img').attr('src').split('?')[0];
                     // alert(index)

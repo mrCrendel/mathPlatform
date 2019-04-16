@@ -19,6 +19,9 @@ urlpatterns = [
     #     name='assignment_seshion_final'),
     # url(r'^assignments/(?P<slug>[\w-]+)/result/$', AssignmentSessionResultView.as_view(),
     #     name='assignment_seshion_result'),
+    url(r'^assignments/create$', views.AssignmentCreateView.as_view(), name='assignment_create'),
+    url(r'^assignments/(?P<slug>[\w-]+)/update/$', views.AssignmentUpdateView.as_view(), name='assignment_update'),
+    url(r'^assignments/(?P<slug>[\w-]+)/delete/$', views.AssignmentDeleteView.as_view(), name='assignment_delete'),
 
     url(r'^assignment-results/$', views.AssignmentResultsListView.as_view(), name='assignment_result_list'),
     url(r'^assignment-results/(?P<slug>[\w-]+)/$', views.AssignmentResultDetailView.as_view(),
@@ -35,6 +38,10 @@ urlpatterns = [
     url(r'^streams/(?P<slug>[\w-]+)/$', views.StreamDetailView.as_view(), name='stream_detail'),
     url(r'^streams/(?P<slug>[\w-]+)/enroll/$', views.StreamEnrolelView.as_view(), name='stream_enroll'),
     url(r'^streams/(?P<slug>[\w-]+)/unenroll/$', views.StreamUnenrollView.as_view(), name='stream_unenroll'),
+
+    url(r'^streams/create$', views.StreamCreateView.as_view(), name='stream_create'),
+    url(r'^streams/(?P<slug>[\w-]+)/update/$', views.StreamUpdateView.as_view(), name='stream_update'),
+    url(r'^streams/(?P<slug>[\w-]+)/delete/$', views.StreamDeleteView.as_view(), name='stream_delete'),
 
     url(r'^subjects/$', views.SubjectListView.as_view(), name='subjects_list'),
     url(r'^subjects/(?P<slug>[\w-]+)/$', views.SubjectDetailView.as_view(), name='subject_detail'),

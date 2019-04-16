@@ -84,9 +84,7 @@ def question_solver(function_code, question):
 
 
 def question_creater(function_code):
-
     if TopicList.is_addition(function_code):
-        print('----!')
         generated_question = generate_simple_exercise('+')
 
     elif TopicList.is_subtraction(function_code):
@@ -114,3 +112,21 @@ def question_creater(function_code):
         generated_question = generate_der_eq()
 
     return generated_question
+
+
+def convert_to_latex(function_code, question):
+    if TopicList.is_differential_equation_with(function_code):
+        latex_question = latex(question[0])
+    elif TopicList.is_addition(function_code):
+        latex_question = latex(question)
+    elif TopicList.is_multiplication(function_code):
+        latex_question = latex(question)
+    elif TopicList.is_subtraction(function_code):
+        latex_question = latex(question)
+    elif TopicList.is_division(function_code):
+        latex_question = latex(question)
+    elif TopicList.is_differential_equation(function_code):
+        latex_question = latex(question)
+    else:
+        latex_question = latex(eval(question))
+    return latex_question

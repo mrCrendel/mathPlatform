@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}Create Stream{% endblock %}
+
+{% block content %}
+    <div class="row card-down-little">
+      <div class="col-md-12 card">
+      <br>
+        <div class="row">
+          <div class="col-md-4 align-self-center">
+              <h3 class="inline">Streams</h3>
+          </div>
+
+          <div class="col-md-3 align-self-center">
+            {% if user.is_authenticated %}
+                <h1>Feel Form</h1>
+                <hr>
+                <form class="" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                  {{ form.media }}
+                  {{ form }}
+                  <input type="submit" class="btn btn-default" value="Save"/>
+                  <a href="{% url 'process:index' %}">Come back</a>
+                </form>
+            {% endif %}
+          </div>
+
+        </div>
+      <br>
+      </div>
+    </div>
+
+{% endblock %}
+{% block js %}
+{% endblock %}

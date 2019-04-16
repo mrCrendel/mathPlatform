@@ -12,7 +12,12 @@
           <div class="col-md-3 align-self-center">
             <ul style="list-style: none;">
               {% for stream in streams %}
-                <li><a href="{% url 'process:stream_detail' stream.slug %}" class="btn btn-primary mb-1">{{ stream.title }}</a></li>
+                  {% if user.is_staff %}
+                      <li><a href="{% url 'process:stream_update' stream.slug %}" class="btn btn-primary mb-1">{{ stream.title }}</a></li>
+                  {%  else %}
+                      <li><a href="{% url 'process:stream_detail' stream.slug %}" class="btn btn-primary mb-1">{{ stream.title }}</a></li>
+                  {% endif %}
+
               {% endfor %}
             </ul>
           </div>

@@ -1,35 +1,44 @@
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
+from django.db import transaction
 from django.http import JsonResponse, Http404
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import (
                 TemplateView,
+                CreateView,
                 DetailView,
+                DeleteView,
                 ListView,
-)
+                UpdateView,
+                View,
+                RedirectView
+                )
 from django.views.generic.edit import FormView
 from process.models import *
 from process.forms import *
 from process.include import *
 from process.mixins import FormUserNeededMixin, UserOwnerMixin
-from process.math.math_differential_equation import *
+# from process.math.math_differential_equation import *
 
 
 class IndexTemplateView(TemplateView):
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
+
         context = super(IndexTemplateView, self).get_context_data(**kwargs)
+
+        print(self.request.user)
         context['data_of_home_page'] = HomePage.objects.first()
-        context['subjecs'] = Subject.objects.all()
+        context['subjects'] = Subject.objects.all()
         context['streams'] = Stream.objects.all()
         context['sessions'] = AssignmentSession.objects.all()
         if self.request.user.is_staff:
-            context['assignments'] = Assignment.objects.all()
-            context['streams'] = Stream.objects.all()
+            context['assignments'] = Assignment.objects.filter(user=self.request.user)
         elif self.request.user.is_authenticated:
-            context['assignments'] = Assignment.objects.all()
-            context['streams'] = Stream.objects.all()
+            context['assignments'] = Assignment.objects.filter(stream__users=self.request.user)
         return context
 
 
@@ -42,15 +51,71 @@ class StreamListView(ListView):
 class StreamDetailView(DetailView):
     template_name = 'streams/stream-detail.html'
     model = Stream
-    context_object_name='stream'
+    context_object_name = 'stream'
 
-    def get_context_data(self,**kwargs):
-        context = super(StreamDetailView,self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(StreamDetailView, self).get_context_data(**kwargs)
         enroll_form = StreamEnrollForm(self.request.GET or None)
         unenroll_form = StreamUnEnrollForm(self.request.GET or None)
         context['enroll_form'] = enroll_form
         context['unenroll_form'] = unenroll_form
         return context
+
+
+class StreamCreateView(SuccessMessageMixin, FormUserNeededMixin, CreateView):
+    form_class = StreamFormCreate
+    template_name = 'streams/curator-stream-form-create.html'
+    success_url = reverse_lazy('/')
+    success_message = "%(suc_message)s"
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(cleaned_data,
+                                           suc_message="Stream {0} successfully created".format(self.object.title))
+
+
+class StreamUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserOwnerMixin, UpdateView, RedirectView):
+    form_class = StreamFormUpdate
+    model = Stream
+    template_name = 'streams/curator-stream-form-update.html'
+    context_object_name = 'update_stream'
+    # success_url = reverse_lazy('process:index')
+    success_message = "%(suc_message)s"
+
+    def get_context_data(self, **kwargs):
+        context = super(StreamUpdateView, self).get_context_data(**kwargs)
+        context['delete_url'] = '/streams/{0}/delete/'.format(self.object.slug)
+        return context
+
+    # def get_redirect_url(self, *args, **kwargs):
+    #     slug = self.kwargs.get("slug")
+    #     obj = get_object_or_404(Store, slug=slug)
+    #     url_ = obj.get_absolute_url()
+    #     # self.request.user
+    #     return url_
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(cleaned_data,
+                                           suc_message="Stream {0} successfully updated ".format(self.object.title))
+
+
+class StreamDeleteView(SuccessMessageMixin, LoginRequiredMixin, DeleteView):
+    """
+    Sub-class the DeleteView to restrict a User from deleting other
+    user's data.
+    """
+    form_class = StreamFormCreate
+    model = Stream
+    # success_url = reverse_lazy('webapp:stores')
+    template_name = 'streams/curator-stream-form-create.html'
+    success_message = "Stream successfully deleted!"
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(StreamDeleteView, self).delete(request, *args, **kwargs)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(cleaned_data,
+                                           suc_message="Stream {0} successfully deleted".format(self.object.title))
 
 
 class StreamEnrolelView(FormView):
@@ -62,7 +127,7 @@ class StreamEnrolelView(FormView):
     def form_valid(self, form):
         context = super(StreamEnrolelView, self).form_valid(form)
         stream_slug = self.kwargs['slug']
-        stream  = Stream.objects.get(slug=stream_slug)
+        stream = Stream.objects.get(slug=stream_slug)
         enroll_key = stream.enroll_key
         user = self.request.user
         enrollment_key = form.cleaned_data['enrollment_key']
@@ -83,7 +148,7 @@ class StreamUnenrollView(FormView):
 
     def form_valid(self, form):
         stream_slug = self.kwargs['slug']
-        stream  = Stream.objects.get(slug=stream_slug)
+        stream = Stream.objects.get(slug=stream_slug)
         user = self.request.user
         stream.users.remove(user)
         stream.save()
@@ -117,14 +182,23 @@ class TopicDetailView(DetailView):
     context_object_name = 'topic'
     slug_url_kwarg = 'topic_slug'
 
-    def get_context_data(self,**kwargs):
-        context = super(TopicDetailView,self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(TopicDetailView, self).get_context_data(**kwargs)
         topic_check = TopicTakeAnswerForm(self.request.GET or None)
+
+
         context['topic_check_context'] = topic_check
         topic_slug = kwargs['object'].slug
-        topic_code = kwargs['object'].function_code
-        question = question_creater(topic_code)
+        function_code = kwargs['object'].function_code
+        question = question_creater(function_code)
+        # print(latex(question))
         context['topic_latex_question'] = latex(question)
+        context['topic_description'] = kwargs['object'].description
+        if TopicList.is_differential_equation_with(function_code):
+            # print(question[0])
+            context['topic_description'] = kwargs['object'].description %(question[1], question[2])
+            # print(context['topic_description'])
+            context['topic_latex_question'] = latex(question[0])
         context['topic_question'] = question
         return context
 
@@ -157,7 +231,7 @@ class TopicCheckAnswerView(FormView):
         return super(TopicCheckAnswerView, self).form_valid(form)
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('process:topic_detail', kwargs={'slug': 'calculus-1','topic_slug': self.kwargs['slug']})
+        return reverse_lazy('process:topic_detail', kwargs={'slug': 'calculus-1', 'topic_slug': self.kwargs['slug']})
 
 
     # def get(self, request):
@@ -203,8 +277,16 @@ def window_looses_foxus(request):
     new_question = question_creater(topic_fuction_code)
     session_question = get_object_or_404(AssignmentSessionQuestions, id=question_id)
     session_question.question = new_question
+    new_description = topic.description
+    if TopicList.is_differential_equation_with(topic_fuction_code):
+        session_question.description = topic.description % (new_question[1], new_question[2])
+        print(session_question.description)
+        new_description = topic.description % (new_question[1], new_question[2])
+        new_question = new_question[0]
+
     session_question.save()
     context = {
+        'new_description': new_description,
         'new_question': str(latex(new_question)),
     }
     return JsonResponse(context)
@@ -213,11 +295,151 @@ def window_looses_foxus(request):
 def load_topics(request):
     subject_id = request.GET.get('subject')
     subject = get_object_or_404(Subject, id=subject_id)
-    topic = Topic.objects.filter(subject=subject).order_by('title')
-    context = {
-        {'topic': topic}
-    }
-    return JsonResponse(context)
+    topics = Topic.objects.filter(subject=subject)
+    # context = {
+    #     {'topic': topic}
+    # }
+    # return JsonResponse(context)
+    return render(request, 'includes/city_dropdown_list_options.html', {'topics': topics})
+
+
+class AssignmentCreateView(SuccessMessageMixin, FormUserNeededMixin, CreateView):
+    model = Assignment
+    form_class = AssignmentCreateForm
+    template_name = 'assignments/curator-assignment-create.html'
+    success_url = reverse_lazy('process:index')
+    success_message = "%(suc_message)s"
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(AssignmentCreateView, self).get_context_data(**kwargs)
+    #     if self.request.POST:
+    #         context['topic_formset'] = AssignmentTopicFormSet(self.request.POST)
+    #     else:
+    #         context['topic_formset'] = AssignmentTopicFormSet()
+    #     return context
+    #
+    # def form_valid(self, form):
+    #     context = self.get_context_data()
+    #     formset = context['topic_formset']
+    #     if formset.is_valid():
+    #         self.object = form.save()
+    #         formset.instance = self.object
+    #         formset.save()
+    #         return redirect(self.success_url)
+    #     else:
+    #         return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(AssignmentCreateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['addtopic'] = AssignmentTopicFormSet(data=self.request.POST, files=self.request.FILES,
+                                                         instance=self.object)
+        else:
+            context['addtopic'] = AssignmentTopicFormSet()
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        addgallery = context['addtopic']
+
+        with transaction.atomic():
+            self.object = form.save()
+
+            if addgallery.is_valid():
+                addgallery.instance = self.object
+                addgallery.save()
+        return super(AssignmentCreateView, self).form_valid(form)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(cleaned_data,
+                                           suc_message="Assignment {0} successfully created".format(self.object.title))
+
+
+class AssignmentUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserOwnerMixin, UpdateView, RedirectView):
+    form_class = AssignmentCreateForm
+    model = Assignment
+    template_name = 'assignments/curator-assignment-update.html'
+    context_object_name = 'update_stream'
+    success_url = reverse_lazy('process:index')
+    success_message = "%(suc_message)s"
+
+    def get_context_data(self, **kwargs):
+        context = super(AssignmentUpdateView, self).get_context_data(**kwargs)
+        context['delete_url'] = '/assignments/{0}/delete/'.format(self.object.slug)
+        if self.request.POST:
+            context['addtopic'] = AssignmentTopicFormSet(data=self.request.POST, files=self.request.FILES,
+                                                         instance=self.object)
+        else:
+            context['addtopic'] = AssignmentTopicFormSet(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        addgallery = context['addtopic']
+
+        with transaction.atomic():
+            self.object = form.save()
+
+            if addgallery.is_valid():
+                addgallery.instance = self.object
+                addgallery.save()
+        return super(AssignmentUpdateView, self).form_valid(form)
+    # def get_context_data(self, **kwargs):
+    #     context = super(AssignmentUpdateView, self).get_context_data(**kwargs)
+    #     context['delete_url'] = '/assignments/{0}/delete/'.format(self.object.slug)
+    #     if self.request.POST:
+    #         context['track_formset'] = AssignmentTopicFormSet(self.request.POST, instance=self.object)
+    #         context['topic_formset'].full_clean()
+    #     else:
+    #         context['topic_formset'] = AssignmentTopicFormSet(instance=self.object)
+    #     return context
+    #
+    # def form_valid(self, form):
+    #     context = self.get_context_data()
+    #     formset = context['topic_formset']
+    #     if formset.is_valid():
+    #         self.object = form.save()
+    #         formset.instance = self.object
+    #         formset.save()
+    #         return redirect(self.success_url)
+    #     else:
+    #         return self.render_to_response(self.get_context_data(form=form))
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(AssignmentUpdateView, self).get_context_data(**kwargs)
+    #     context['delete_url'] = '/assignments/{0}/delete/'.format(self.object.slug)
+    #     return context
+
+    # def get_redirect_url(self, *args, **kwargs):
+    #     slug = self.kwargs.get("slug")
+    #     obj = get_object_or_404(Store, slug=slug)
+    #     url_ = obj.get_absolute_url()
+    #     # self.request.user
+    #     return url_
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(cleaned_data,
+                                           suc_message="Assignment {0} successfully updated ".format(self.object.title))
+
+
+class AssignmentDeleteView(SuccessMessageMixin, LoginRequiredMixin, DeleteView):
+    """
+    Sub-class the DeleteView to restrict a User from deleting other
+    user's data.
+    """
+    form_class = AssignmentCreateForm
+    model = Assignment
+    success_url = reverse_lazy('process:index')
+    template_name = 'assignments/curator-assignment-delete.html'
+    success_message = "Assignment successfully deleted!"
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(AssignmentDeleteView, self).delete(request, *args, **kwargs)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(cleaned_data,
+                                           suc_message="Assignment {0} successfully deleted".format(self.object.title))
 
 
 class AssignmentListView(ListView):
@@ -311,6 +533,7 @@ class AssignmentDetailView(DetailView):
         question_count = assignment_session.questions_amount
         assignment_end = assignment_session.started_at + datetime.timedelta(minutes=assignment.available_for_x_minutes)
         session_end = assignment_session.started_at + datetime.timedelta(minutes=assignment.available_for_x_minutes)
+
         if question_index >= question_count or timezone.now() > assignment_end or timezone.now() > assignment_end:
             assignment_session.current_index = question_count
             assignment_session.save()
@@ -323,15 +546,32 @@ class AssignmentDetailView(DetailView):
         # question_id = int(assignment_session.questions_amount.split(",")[question_index])
         question_list = AssignmentSessionQuestions.objects.filter(session=assignment_session)
         question_id_list = [q_id.id for q_id in question_list]
+        print('question_id_list', question_id_list)
         question = AssignmentSessionQuestions.objects.get(id=question_id_list[question_index])
-        q = question.question
+        # q = question.question
+        context['started_at'] = assignment_session.started_at
         context['assignment_end'] = assignment_end
         context['question'] = question
-        print(q)
-        print(print_latex(q))
-        context['latex_question'] = latex(q)
+        context['question_description'] = question.description
+
         context['progress'] = ProgressBar(question_index, question_count)
         context['form'] = AssignmentFormViewForm(self.request.GET or None)
+
+        # if TopicList.is_differential_equation_with(question.topic.function_code):
+        #     context['latex_question'] = latex(question.question[0])
+        # elif TopicList.is_addition(question.topic.function_code):
+        #     context['latex_question'] = latex(question.question)
+        # elif TopicList.is_multiplication(question.topic.function_code):
+        #     context['latex_question'] = latex(question.question)
+        # elif TopicList.is_subtraction(question.topic.function_code):
+        #     context['latex_question'] = latex(question.question)
+        # elif TopicList.is_division(question.topic.function_code):
+        #     context['latex_question'] = latex(question.question)
+        # elif TopicList.is_differential_equation(question.topic.function_code):
+        #     context['latex_question'] = latex(question.question)
+        # else:
+        #     context['latex_question'] = latex(eval(question.question))
+        context['latex_question'] = convert_to_latex(question.topic.function_code, question.question)
         return context
 
 
@@ -342,7 +582,7 @@ class AssignmentFormView(FormView):
     context_object_name = 'assignment'
 
     def form_valid(self, form, **kwargs):
-        context = super(AssignmentFormView,self).get_context_data(**kwargs)
+        context = super(AssignmentFormView, self).get_context_data(**kwargs)
         assignment_slug = self.kwargs['slug']
         print(assignment_slug)
         user = self.request.user
@@ -365,7 +605,7 @@ class AssignmentFormView(FormView):
         question.is_correct = questions_t_o_f(question.topic.function_code, question.question, answer)
         # question_solver() solve question and return answers
         question.question_answer = question_solver(question.topic.function_code, question.question)
-        question.finished_at =  timezone.now()
+        question.finished_at = timezone.now()
         question.save()
 
         assignment_session.current_index += 1
@@ -382,7 +622,7 @@ class AssignmentFormView(FormView):
         return redirect('/assignments/%s/' % assignment_slug)
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('process:assignment_seshion_final', kwargs = {'slug': self.kwargs['slug']})
+        return reverse_lazy('process:assignment_seshion_final', kwargs={'slug': self.kwargs['slug']})
 
 
 class AssignmentSessionFinalView(DetailView):

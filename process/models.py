@@ -52,12 +52,10 @@ class Topic(models.Model):
 
 
 class Stream(models.Model):
-    users = models.ManyToManyField(User, blank=True)
+    users = models.ManyToManyField(User, blank=True, related_name='rn_stream')
     title = models.CharField(max_length=50, unique=True)
     stream_description = RichTextUploadingField('Stream description', default='')
-    stream_code = models.CharField(max_length=50,
-                                   unique=True)
-    enroll_key = models.CharField(max_length=20)
+    enroll_key = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(unique=True)
 
     def __str__(self):
@@ -68,13 +66,14 @@ class Stream(models.Model):
 
 
 class Assignment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1, null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=50, unique=True)
     stream = models.ForeignKey(
         Stream,
         on_delete=models.CASCADE,
         null=False,
         blank=False)
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    # author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     available_from = models.DateTimeField(null=True)
@@ -100,9 +99,9 @@ class AssignmentTopic(models.Model):
         blank=False)
     topic = models.ForeignKey(
         Topic,
-        # chained_field="subject",
-        # chained_model_field="subject",
-        # show_all=False,
+        # chained_field='subject',
+        # chained_model_field='subject',
+        # show_all=True,
         # auto_choose=True,
         # sort=True,
         on_delete=models.CASCADE,
@@ -152,31 +151,44 @@ class AssignmentSession(models.Model):
 
 class AssignmentSessionQuestionsMeneger(models.Manager):
     def create_session_question(self, session, assignment,):
-        question = AssignmentTopic.objects.filter(assignment = assignment)
+        question = AssignmentTopic.objects.filter(assignment=assignment)
         for q in question:
             question_amount = q.example_amount
+            print(question_amount)
             question_points = q.points
-            topic = Topic.objects.get(title = q.topic)
+            topic = Topic.objects.get(title=q.topic)
             topic_code = topic.function_code
+            topic_description = topic.description
+
             while question_amount != 0:
+                print(question_amount)
                 generated_question = question_creater(topic_code)
-                assignment_session_question = self.create(session=session, topic=topic, question=str(generated_question),
-                                                          points=question_points, description=topic.description)
-                question_amount -=1
+                description = topic_description
+
+                if TopicList.is_differential_equation_with(topic_code):
+                    description = topic_description.format(generated_question[1], generated_question[2])
+
+                assignment_session_question = self.create(session=session,
+                                                          topic=topic,
+                                                          question=str(generated_question),
+                                                          points=question_points,
+                                                          description=description
+                                                          )
+                question_amount -= 1
+
         return assignment_session_question
 
 
 class AssignmentSessionQuestions(models.Model):
-
     """Automatically  create questions from assignment data for everry session for each user will be differen questoions"""
     QUESTION_TYPES = (
         ('O', 'Open'),
         ('C', 'Closed'),
     )
     session = models.ForeignKey(AssignmentSession,
-                                      on_delete=models.CASCADE,
-                                      null=False,
-                                      blank=False)
+                                on_delete=models.CASCADE,
+                                null=False,
+                                blank=False)
     type = models.CharField(max_length=100, choices=QUESTION_TYPES, default='Open')
     topic = models.ForeignKey(
         Topic,
@@ -187,12 +199,10 @@ class AssignmentSessionQuestions(models.Model):
     question = models.CharField(max_length=50)
     question_answer = models.CharField(max_length=100, null=True, blank=False)
     points = models.IntegerField(null=True)
-
     user_answer = models.CharField(max_length=100, null=True, blank=False)
     is_correct = models.CharField(max_length=100, null=True, blank=False)
     updated = models.DateTimeField(auto_now=True)
     objects = AssignmentSessionQuestionsMeneger()
-
 
 
 #create slug for Stream
@@ -207,9 +217,11 @@ def create_stream_slug(instance, new_slug=None):
         return create_stream_slug(instance, new_slug=new_slug)
     return slug
 
+
 def pre_save_stream_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = create_stream_slug(instance)
+
 
 #create slug for Topic
 def create_topic_slug(instance, new_slug=None):
@@ -223,9 +235,11 @@ def create_topic_slug(instance, new_slug=None):
         return create_topic_slug(instance, new_slug=new_slug)
     return slug
 
+
 def pre_save_topic_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = create_topic_slug(instance)
+
 
 #create dlug for Subject
 def create_subject_slug(instance, new_slug=None):
@@ -239,9 +253,11 @@ def create_subject_slug(instance, new_slug=None):
         return create_subject_slug(instance, new_slug=new_slug)
     return slug
 
+
 def pre_save_subject_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = create_subject_slug(instance)
+
 
 # create slug for Assignment
 def create_assignment_slug(instance, new_slug=None):
@@ -259,8 +275,8 @@ def pre_save_assignment_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = create_assignment_slug(instance)
 
-#create question from AssingmentTopic model
 
+#create question from AssingmentTopic model
 pre_save.connect(pre_save_stream_post_receiver, sender=Stream)
 pre_save.connect(pre_save_topic_post_receiver, sender=Topic)
 pre_save.connect(pre_save_subject_post_receiver, sender=Subject)

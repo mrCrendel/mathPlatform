@@ -35,5 +35,9 @@ class TopicList:
         return "LIMIT" == name.upper()
 
     @staticmethod
+    def is_limit_2_1(name):
+        return "LIMIT21" == name.upper()
+
+    @staticmethod
     def is_derivative(name):
         return "DERIVATIVE" == name.upper()

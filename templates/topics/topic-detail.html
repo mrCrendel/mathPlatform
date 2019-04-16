@@ -7,11 +7,15 @@
     <div class="row card-down-little">
       <div class="col-md-12 card">
       <br>
-        <div class="row">
-          <div class="col-md-4 align-self-center">
-              <h3 class="inline">Topic Detail Page</h3>
+          <div class="col-md-9 align-self-center" style="flex: 0 0 0">
+              <h3 class="inline">{{ topic }}</h3>
           </div>
-          <div class="col-md-3 align-self-center">
+      <br>
+          <div class="col-md-9 align-self-center" style="flex: 0 0 0">
+              <h3 class="inline">{{ topic_description }}</h3>
+          </div>
+          <br>
+          <div class="col-md-9 align-self-center" style="">
             {% if user.is_authenticated %}
               <div id="not-enrolled-section">
                 <p style="font-size: 20px; font-family: 'Arial'">$${{ topic_latex_question }}$$</p>
@@ -28,14 +32,6 @@
               </div>
             {% endif %}
           </div>
-
-          <div class="col-md-3 align-self-center">
-            <ul style="list-style: none;">
-              <p>This is topic of subject</p>
-              {{ topic }}
-            </ul>
-          </div>
-        </div>
       <br>
       </div>
     </div>
