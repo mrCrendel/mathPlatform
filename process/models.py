@@ -80,7 +80,7 @@ class Assignment(models.Model):
     end_time = models.DateTimeField(null=True)
     available_for_x_minutes = models.IntegerField(null=True)
     slug = models.SlugField(unique=True)
-    is_exam = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.stream.title + ': ' + self.title
@@ -91,7 +91,8 @@ class AssignmentTopic(models.Model):
         Assignment,
         on_delete=models.CASCADE,
         null=False,
-        blank=False)
+        blank=False,
+        related_name='assignment_topic_for')
     subject = models.ForeignKey(
         Subject,
         on_delete=models.CASCADE,

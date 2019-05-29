@@ -17,8 +17,7 @@
                 {{ result.assignment }} | {{ result.updated  }}
                 <br>
                 {% for question in questions %}
-                  {{ forloop.counter }})
-                  <p>Topic {{ question.topic }}</p>
+                  {{ forloop.counter }}) Topic {{ question.topic }}
                   <p>Question was:  {{ question.question }}</p>
                   <p>True answer is : {{ question.question_answer }}</p>
                   <p>Student answer: {{ question.user_answer }}</p>

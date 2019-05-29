@@ -40,9 +40,11 @@ class AssignmentTopicInline(admin.StackedInline):
             # 'app/js/myscript.js',  # app static folder
         )
 
+
 @admin.register(Assignment)
 class AssignmentAdmin(MarkdownxModelAdmin):
     inlines = [AssignmentTopicInline]
+    prepopulated_fields = {'slug': ('title',)}
 
 
 class TopicAdmin(admin.StackedInline):

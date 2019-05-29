@@ -94,7 +94,7 @@ class AssignmentCreateForm(forms.ModelForm):
             'available_from',
             'end_time',
             'available_for_x_minutes',
-            'is_exam',
+            'active',
         ]
 
 

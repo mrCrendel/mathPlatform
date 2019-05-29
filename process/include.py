@@ -115,8 +115,12 @@ def question_creater(function_code):
 
 
 def convert_to_latex(function_code, question):
+
     if TopicList.is_differential_equation_with(function_code):
-        latex_question = latex(question[0])
+        y = Function('y')
+        x = Symbol('x', real=True)
+        question = ''.join([i for i in question.split(' ')][:-2])[1:-1]
+        latex_question = latex(eval(question))
     elif TopicList.is_addition(function_code):
         latex_question = latex(question)
     elif TopicList.is_multiplication(function_code):
@@ -126,7 +130,10 @@ def convert_to_latex(function_code, question):
     elif TopicList.is_division(function_code):
         latex_question = latex(question)
     elif TopicList.is_differential_equation(function_code):
-        latex_question = latex(question)
+        y = Function('y')
+        x = Symbol('x', real=True)
+        x, z, u = symbols('x z u')
+        latex_question = latex(eval(question))
     else:
         latex_question = latex(eval(question))
     return latex_question

@@ -36,12 +36,12 @@
                               <tr class="clickable-row" data-href="{% url 'process:supper_assignments_session_list' assignment.slug %}" style="cursor: pointer">
                                 <td>{{ assignment.title }}</td>
                                 {% if assignment.available_from %}
-                                    <td>{{ assignment.available_from }}</td>
+                                    <td>{{ assignment.available_from|date:"d/m/y H:i" }}</td>
                                 {% else %}
                                     <td>-</td>
                                 {% endif %}
                                 {% if assignment.end_time %}
-                                    <td>{{ assignment.end_time }}</td>
+                                    <td>{{ assignment.end_time|date:"d/m/y H:i " }}</td>
                                 {% else %}
                                     <td>-</td>
                                 {% endif %}
@@ -50,16 +50,16 @@
                                 {% else %}
                                     <td>-</td>
                                 {% endif %}
-                                <th scope="col">
-                                    <a href="/download_answers/{{ assignment.id }}" style="text-decoration: none;">
-                                        <i class="icon-download"></i>
-                                    </a>
-                                </th>
-                                <th scope="col">
-                                    <a href="/download_questions/{{ assignment.id }}" style="text-decoration: none;">
-                                        <i class="icon-download"></i>
-                                    </a>
-                                </th>
+                                {% if assignment %}
+                                    <td>{{ assignment|count_user}}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                {% if assignment %}
+                                    <td>{{ assignment|count_questions}}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
                               </tr>
                             {% elif user.is_authenticated %}
 

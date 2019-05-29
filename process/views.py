@@ -38,7 +38,7 @@ class IndexTemplateView(TemplateView):
         if self.request.user.is_staff:
             context['assignments'] = Assignment.objects.filter(user=self.request.user)
         elif self.request.user.is_authenticated:
-            context['assignments'] = Assignment.objects.filter(stream__users=self.request.user)
+            context['assignments'] = Assignment.objects.filter(stream__users=self.request.user).filter(active=True)
         return context
 
 
@@ -196,7 +196,8 @@ class TopicDetailView(DetailView):
         context['topic_description'] = kwargs['object'].description
         if TopicList.is_differential_equation_with(function_code):
             # print(question[0])
-            context['topic_description'] = kwargs['object'].description %(question[1], question[2])
+            print(type(kwargs['object'].description))
+            context['topic_description'] = (kwargs['object'].description).format(question[1], question[2])
             # print(context['topic_description'])
             context['topic_latex_question'] = latex(question[0])
         context['topic_question'] = question
@@ -279,9 +280,8 @@ def window_looses_foxus(request):
     session_question.question = new_question
     new_description = topic.description
     if TopicList.is_differential_equation_with(topic_fuction_code):
-        session_question.description = topic.description % (new_question[1], new_question[2])
-        print(session_question.description)
-        new_description = topic.description % (new_question[1], new_question[2])
+        session_question.description = (topic.description).format(new_question[1], new_question[2])
+        new_description = (topic.description).format(new_question[1], new_question[2])
         new_question = new_question[0]
 
     session_question.save()
@@ -573,6 +573,9 @@ class AssignmentDetailView(DetailView):
         #     context['latex_question'] = latex(eval(question.question))
         context['latex_question'] = convert_to_latex(question.topic.function_code, question.question)
         return context
+
+    def form_invalid(self):
+        return redirect(reverse('index'))
 
 
 class AssignmentFormView(FormView):

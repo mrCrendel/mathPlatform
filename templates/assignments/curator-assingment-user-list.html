@@ -44,7 +44,7 @@
                               <td>-</td>
                           {% endif %}
                           <td> {{ session.questions_amount }}/{{ session.correct_answers }} </td>
-                          <td> {{ session.question_amount|percentage:session.correct_answers }}</td>
+                          <td> {{ session.questions_amount|percentage:session.correct_answers }}</td>
                         </tr>
 
                   {% endfor %}

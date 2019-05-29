@@ -21,11 +21,24 @@ def get_all_topics():
 
 @register.filter(name='percentage')
 def percentage(fraction, population):
+    print('fraction:', fraction, 'population: ', population)
     try:
-        return "%.2f%%" % ((float(fraction) / float(population)) * 100)
+        return "%.2f%%" % (int((float(population) / float(fraction)) * 100))
     except ValueError:
         return ''
 
-# @register.filter(name='convert_latex')
-# def convert_latex(value):
-#
+
+@register.filter(name='count_questions')
+def percentage(assignment):
+    topics = AssignmentTopic.objects.filter(assignment=assignment)
+    sum = 0
+    for topic in topics:
+        sum += topic.example_amount
+    return sum
+
+
+@register.filter(name='count_user')
+def percentage(assignment):
+    stream_users = assignment.stream.users.count()
+    session_count = AssignmentSession.objects.filter(assignment=assignment).count()
+    return '%s/%s' % (stream_users, session_count)
